@@ -485,9 +485,9 @@ function createPostItElement(viaggio) {
     };
 
     const motivoIcon = {
-        'ritiro': '📥',
-        'consegna': '📤',
-        'entrambi': '🔄'
+        'ritiro': '📥 Ritiro',
+        'consegna': '📤 Consegna',
+        'entrambi': '🔄 Ritiro+Consegna'
     };
 
     // Ultra compact version with merce and motivo visible
@@ -838,6 +838,148 @@ function importData() {
 }
 
 // ==========================================
+// GOOGLE MAPS EXPORT (ADMIN ONLY)
+// ==========================================
+
+function exportToGoogleMaps() {
+    if (!isAdmin()) {
+        showToast('Solo gli amministratori possono esportare i percorsi', 'error');
+        return;
+    }
+
+    // Get all viaggi from "pianificato" column in DOM order
+    const pianificatiColumn = document.getElementById('col-pianificato');
+    if (!pianificatiColumn) {
+        showToast('Errore: colonna Pianificato non trovata', 'error');
+        return;
+    }
+
+    const postIts = pianificatiColumn.querySelectorAll('.post-it');
+
+    if (postIts.length === 0) {
+        showToast('Nessun viaggio pianificato da esportare', 'warning');
+        return;
+    }
+
+    // Extract addresses (luogo) from each post-it in sequence
+    const addresses = [];
+    postIts.forEach(postIt => {
+        const id = postIt.dataset.id;
+        const viaggio = viaggi.find(v => v.id === id);
+        if (viaggio && viaggio.luogo) {
+            addresses.push(viaggio.luogo);
+        }
+    });
+
+    if (addresses.length === 0) {
+        showToast('Nessun indirizzo valido trovato', 'warning');
+        return;
+    }
+
+    // Build Google Maps URL
+    let mapsUrl;
+    if (addresses.length === 1) {
+        // Single destination
+        mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addresses[0])}&travelmode=driving`;
+    } else {
+        // Multiple waypoints
+        const origin = encodeURIComponent(addresses[0]);
+        const destination = encodeURIComponent(addresses[addresses.length - 1]);
+
+        if (addresses.length > 2) {
+            // Middle waypoints
+            const waypoints = addresses.slice(1, -1).map(addr => encodeURIComponent(addr)).join('|');
+            mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypoints}&travelmode=driving`;
+        } else {
+            // Just origin and destination
+            mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+        }
+    }
+
+    // Show modal with link
+    showMapsLinkModal(mapsUrl, addresses);
+}
+
+function showMapsLinkModal(mapsUrl, addresses) {
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'mapsModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>🗺️ Percorso Google Maps</h2>
+                <button class="close-btn" onclick="closeMapsModal()">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <h3 style="margin-bottom: 1rem;">📍 Tappe del Percorso:</h3>
+                <ol style="margin-bottom: 1.5rem; padding-left: 1.5rem;">
+                    ${addresses.map((addr, idx) => `
+                        <li style="margin-bottom: 0.5rem;">
+                            ${idx === 0 ? '🚩 ' : idx === addresses.length - 1 ? '🏁 ' : '📍 '}
+                            <strong>${escapeHtml(addr)}</strong>
+                        </li>
+                    `).join('')}
+                </ol>
+
+                <div style="background: var(--gray-100); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Link Google Maps:</label>
+                    <input type="text" id="mapsUrlInput" readonly value="${escapeHtml(mapsUrl)}"
+                           style="width: 100%; padding: 0.5rem; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.9rem;">
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-primary" onclick="copyMapsLink()">
+                        📋 Copia Link
+                    </button>
+                    <button class="btn btn-success" onclick="openMapsLink()">
+                        🗺️ Apri in Google Maps
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeMapsModal()">
+                        Chiudi
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function closeMapsModal() {
+    const modal = document.getElementById('mapsModal');
+    if (modal) modal.remove();
+}
+
+function copyMapsLink() {
+    const input = document.getElementById('mapsUrlInput');
+    if (!input) return;
+
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile devices
+
+    try {
+        document.execCommand('copy');
+        showToast('✅ Link copiato negli appunti!', 'success');
+    } catch (err) {
+        // Fallback for modern browsers
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast('✅ Link copiato negli appunti!', 'success');
+        }).catch(() => {
+            showToast('Errore nella copia del link', 'error');
+        });
+    }
+}
+
+function openMapsLink() {
+    const input = document.getElementById('mapsUrlInput');
+    if (!input) return;
+
+    window.open(input.value, '_blank');
+    showToast('Apertura Google Maps...', 'success');
+}
+
+// ==========================================
 // USER MANAGEMENT (ADMIN ONLY)
 // ==========================================
 
@@ -989,6 +1131,11 @@ window.onclick = function(event) {
     if (event.target === userMgmtModal) {
         closeUserManagement();
     }
+
+    const mapsModal = document.getElementById('mapsModal');
+    if (event.target === mapsModal) {
+        closeMapsModal();
+    }
 };
 
 // Keyboard shortcuts
@@ -997,6 +1144,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closePostItForm();
         closeUserManagement();
+        closeMapsModal();
     }
 
     // Ctrl/Cmd + N to create new post-it (admin only)
