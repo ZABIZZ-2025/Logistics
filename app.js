@@ -164,6 +164,12 @@ function createUserInterface() {
                             <datalist id="luogoList"></datalist>
                         </div>
 
+                        <!-- Campo DATA -->
+                        <div class="form-group">
+                            <label for="userData">Data Richiesta *</label>
+                            <input type="date" id="userData" required>
+                        </div>
+
                         <!-- Campo ORARIO -->
                         <div class="form-group">
                             <label for="userOrario">Orario Richiesto *</label>
@@ -300,6 +306,7 @@ function saveUserPostIt(event) {
         urgente: document.getElementById('userUrgente').checked,
         azienda: document.getElementById('userAzienda').value.trim(),
         luogo: document.getElementById('userLuogo').value.trim(),
+        data: document.getElementById('userData').value,
         orario: document.getElementById('userOrario').value,
         circuito: document.getElementById('userCircuito').value,
         merce: document.getElementById('userMerce').value.trim(),
@@ -365,12 +372,16 @@ function saveData() {
 }
 
 function createSampleData() {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
     return [
         {
             id: generateId(),
             urgente: false,
             azienda: 'CLIENTE BETA',
             luogo: 'Milano, zona centro',
+            data: today,
             orario: '09:30',
             circuito: 'nord-est',
             merce: 'Capi abbigliamento lusso',
@@ -387,6 +398,7 @@ function createSampleData() {
             urgente: true,
             azienda: 'CLIENTE VIP',
             luogo: 'Torino',
+            data: today,
             orario: '14:00',
             circuito: 'nord-ovest',
             merce: 'Collezione speciale',
@@ -403,6 +415,7 @@ function createSampleData() {
             urgente: false,
             azienda: 'FORNITORE TINTORIA',
             luogo: 'Alessandria',
+            data: tomorrow,
             orario: '10:00',
             circuito: 'sud',
             merce: 'Tessuti tinti',
@@ -647,6 +660,15 @@ function createPostItElement(viaggio) {
         'entrambi': '🔄 Ritiro+Consegna'
     };
 
+    // Format data (YYYY-MM-DD -> DD/MM/YYYY)
+    let dataFormatted = '';
+    if (viaggio.data) {
+        const dateParts = viaggio.data.split('-');
+        if (dateParts.length === 3) {
+            dataFormatted = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+        }
+    }
+
     // Ultra compact version with merce and motivo visible
     div.innerHTML = `
         <div class="post-it-header">
@@ -663,7 +685,7 @@ function createPostItElement(viaggio) {
             <div class="post-it-azienda">${escapeHtml(viaggio.azienda)}</div>
             <div class="post-it-info">
                 <span class="post-it-info-item">📍 ${escapeHtml(viaggio.luogo)}</span>
-                <span class="post-it-info-item">⏰ ${viaggio.orario}</span>
+                <span class="post-it-info-item">📅 ${dataFormatted} ⏰ ${viaggio.orario}</span>
                 <span class="post-it-info-item">${circuitoIcon[viaggio.circuito]}</span>
             </div>
             <div class="post-it-merce">📦 ${escapeHtml(viaggio.merce)}</div>
@@ -794,6 +816,7 @@ function savePostIt(event) {
         urgente: document.getElementById('urgente').checked,
         azienda: document.getElementById('azienda').value.trim(),
         luogo: document.getElementById('luogo').value.trim(),
+        data: document.getElementById('data').value,
         orario: document.getElementById('orario').value,
         circuito: document.getElementById('circuito').value,
         merce: document.getElementById('merce').value.trim(),
@@ -811,13 +834,14 @@ function savePostIt(event) {
             showToast('Viaggio aggiornato con successo', 'success');
         }
     } else {
-        // Create new
+        // Create new - Admin viaggi also go to 'richieste' for approval workflow
         const newViaggio = {
             id: generateId(),
             ...viaggioData,
-            column: viaggioData.urgente ? 'urgenze' : 'pianificato',
+            column: 'richieste',
             createdAt: new Date().toISOString(),
-            createdBy: currentSession.userId
+            createdBy: currentSession.userId,
+            createdByName: currentSession.name
         };
         viaggi.unshift(newViaggio);
         showToast('Nuovo viaggio creato', 'success');
@@ -840,6 +864,7 @@ function editViaggio(id) {
     document.getElementById('urgente').checked = viaggio.urgente;
     document.getElementById('azienda').value = viaggio.azienda;
     document.getElementById('luogo').value = viaggio.luogo;
+    document.getElementById('data').value = viaggio.data || '';
     document.getElementById('orario').value = viaggio.orario;
     document.getElementById('circuito').value = viaggio.circuito;
     document.getElementById('merce').value = viaggio.merce;
