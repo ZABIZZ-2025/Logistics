@@ -10,6 +10,7 @@ let currentFilters = {
     circuit: '',
     urgentOnly: false
 };
+let anagraficaClienti = [];
 
 // ==========================================
 // AUTHENTICATION & SESSION
@@ -62,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize UI based on role
     initializeUI();
     loadData();
+    loadAnagraficaClienti();
 
     if (isAdmin()) {
         renderKanban();
@@ -71,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     populateAutocomplete();
+    populateAnagraficaAutocomplete();
     console.log('✅ RBS Logistica Smart inizializzata');
 });
 
@@ -87,23 +90,33 @@ function initializeUI() {
 
     // Hide/show elements based on role
     if (isUser()) {
-        // Hide kanban and sidebar for users
+        // Hide kanban, top bar, and admin buttons for users
         const kanbanContainer = document.querySelector('.kanban-container');
+        const topBar = document.querySelector('.top-bar-sticky');
         const sidebar = document.querySelector('.sidebar');
         const exportBtn = document.querySelector('[onclick="exportData()"]');
         const importBtn = document.querySelector('[onclick="importData()"]');
+        const newViaggioBtn = document.querySelector('[onclick="openPostItForm()"]');
 
         if (kanbanContainer) kanbanContainer.style.display = 'none';
+        if (topBar) topBar.style.display = 'none';
         if (sidebar) sidebar.style.display = 'none';
         if (exportBtn) exportBtn.style.display = 'none';
         if (importBtn) importBtn.style.display = 'none';
+        if (newViaggioBtn) newViaggioBtn.style.display = 'none';
 
         // Create user interface
         createUserInterface();
     } else {
-        // Admin - show user management button
+        // Admin - show user management and anagrafica buttons
         const headerActions = document.querySelector('.header-actions');
         if (headerActions) {
+            const anagraficaBtn = document.createElement('button');
+            anagraficaBtn.className = 'btn btn-secondary';
+            anagraficaBtn.innerHTML = '<span class="icon">📋</span> Anagrafica Clienti';
+            anagraficaBtn.onclick = openAnagraficaManager;
+            headerActions.insertBefore(anagraficaBtn, headerActions.firstChild);
+
             const userMgmtBtn = document.createElement('button');
             userMgmtBtn.className = 'btn btn-secondary';
             userMgmtBtn.innerHTML = '<span class="icon">👥</span> Gestisci Utenti';
@@ -229,6 +242,9 @@ function createUserInterface() {
 
     // Show user's requests
     renderUserRequests();
+
+    // Setup autofill from anagrafica
+    setTimeout(() => setupAnagraficaAutofill(), 100);
 }
 
 function renderUserInterface() {
@@ -405,6 +421,147 @@ function createSampleData() {
 
 function generateId() {
     return 'VIA-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+// ==========================================
+// ANAGRAFICA CLIENTI
+// ==========================================
+
+function loadAnagraficaClienti() {
+    const stored = localStorage.getItem('rbs_anagrafica');
+    if (stored) {
+        try {
+            anagraficaClienti = JSON.parse(stored);
+            console.log(`📋 Caricate ${anagraficaClienti.length} anagrafiche clienti`);
+        } catch (e) {
+            console.error('Errore nel caricamento anagrafica:', e);
+            anagraficaClienti = [];
+        }
+    } else {
+        // Dati di esempio per la demo
+        anagraficaClienti = createSampleAnagrafica();
+        saveAnagraficaClienti();
+    }
+}
+
+function saveAnagraficaClienti() {
+    try {
+        localStorage.setItem('rbs_anagrafica', JSON.stringify(anagraficaClienti));
+        console.log('💾 Anagrafica clienti salvata');
+    } catch (e) {
+        console.error('Errore nel salvataggio anagrafica:', e);
+        showToast('Errore nel salvataggio anagrafica', 'error');
+    }
+}
+
+function createSampleAnagrafica() {
+    return [
+        {
+            id: 'ANA-' + Date.now() + '-1',
+            azienda: 'CLIENTE BETA',
+            luogo: 'Milano, zona centro',
+            circuito: 'nord-est'
+        },
+        {
+            id: 'ANA-' + Date.now() + '-2',
+            azienda: 'CLIENTE VIP',
+            luogo: 'Torino',
+            circuito: 'nord-ovest'
+        },
+        {
+            id: 'ANA-' + Date.now() + '-3',
+            azienda: 'FORNITORE TINTORIA',
+            luogo: 'Alessandria',
+            circuito: 'sud'
+        }
+    ];
+}
+
+function addCliente(azienda, luogo, circuito) {
+    const newCliente = {
+        id: 'ANA-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        azienda: azienda.trim(),
+        luogo: luogo.trim(),
+        circuito: circuito
+    };
+
+    anagraficaClienti.push(newCliente);
+    saveAnagraficaClienti();
+    return newCliente;
+}
+
+function updateCliente(id, azienda, luogo, circuito) {
+    const cliente = anagraficaClienti.find(c => c.id === id);
+    if (cliente) {
+        cliente.azienda = azienda.trim();
+        cliente.luogo = luogo.trim();
+        cliente.circuito = circuito;
+        saveAnagraficaClienti();
+        return true;
+    }
+    return false;
+}
+
+function deleteCliente(id) {
+    const index = anagraficaClienti.findIndex(c => c.id === id);
+    if (index !== -1) {
+        anagraficaClienti.splice(index, 1);
+        saveAnagraficaClienti();
+        return true;
+    }
+    return false;
+}
+
+function findClienteByAzienda(azienda) {
+    return anagraficaClienti.find(c =>
+        c.azienda.toLowerCase() === azienda.toLowerCase()
+    );
+}
+
+function populateAnagraficaAutocomplete() {
+    // Populate autocomplete lists with anagrafica data
+    const aziende = anagraficaClienti.map(c => c.azienda);
+
+    const aziendaLists = document.querySelectorAll('#aziendaList');
+    aziendaLists.forEach(list => {
+        list.innerHTML = aziende.map(a => `<option value="${escapeHtml(a)}">`).join('');
+    });
+}
+
+function setupAnagraficaAutofill() {
+    // Setup autofill for Admin form
+    const aziendaInput = document.getElementById('azienda');
+    if (aziendaInput) {
+        aziendaInput.addEventListener('change', function() {
+            autofillFromAnagrafica('azienda', 'luogo', 'circuito');
+        });
+    }
+
+    // Setup autofill for User form
+    const userAziendaInput = document.getElementById('userAzienda');
+    if (userAziendaInput) {
+        userAziendaInput.addEventListener('change', function() {
+            autofillFromAnagrafica('userAzienda', 'userLuogo', 'userCircuito');
+        });
+    }
+}
+
+function autofillFromAnagrafica(aziendaFieldId, luogoFieldId, circuitoFieldId) {
+    const aziendaInput = document.getElementById(aziendaFieldId);
+    const luogoInput = document.getElementById(luogoFieldId);
+    const circuitoInput = document.getElementById(circuitoFieldId);
+
+    if (!aziendaInput || !luogoInput || !circuitoInput) return;
+
+    const azienda = aziendaInput.value.trim();
+    if (!azienda) return;
+
+    const cliente = findClienteByAzienda(azienda);
+    if (cliente) {
+        luogoInput.value = cliente.luogo;
+        circuitoInput.value = cliente.circuito;
+        showToast('📋 Dati compilati automaticamente dall\'anagrafica', 'success');
+    }
 }
 
 // ==========================================
@@ -607,6 +764,9 @@ function openPostItForm() {
     document.getElementById('postItForm').reset();
     document.getElementById('postItId').value = '';
     document.getElementById('modalTitle').textContent = '📝 Nuovo Viaggio - Post-it Virtuale';
+
+    // Setup autofill from anagrafica
+    setTimeout(() => setupAnagraficaAutofill(), 100);
 }
 
 function closePostItForm() {
@@ -1089,6 +1249,163 @@ function deleteUser(userId) {
 }
 
 // ==========================================
+// ANAGRAFICA MANAGEMENT
+// ==========================================
+
+function openAnagraficaManager() {
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'anagraficaModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>📋 Gestione Anagrafica Clienti</h2>
+                <button class="close-btn" onclick="closeAnagraficaManager()">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1rem; color: var(--gray-600);">
+                    Gestisci l'anagrafica dei clienti per auto-compilare i campi durante la creazione dei viaggi.
+                </p>
+
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Azienda/Cliente</th>
+                            <th>Luogo Destinazione</th>
+                            <th>Circuito Geografico</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="anagraficaTableBody">
+                        ${renderAnagraficaTable()}
+                    </tbody>
+                </table>
+
+                <button class="btn btn-primary" onclick="showAddClienteForm()" style="margin-top: 1rem;">
+                    ➕ Aggiungi Cliente
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function renderAnagraficaTable() {
+    if (anagraficaClienti.length === 0) {
+        return '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--gray-500);">Nessun cliente in anagrafica. Aggiungi il primo cliente!</td></tr>';
+    }
+
+    return anagraficaClienti.map(c => `
+        <tr>
+            <td><strong>${escapeHtml(c.azienda)}</strong></td>
+            <td>${escapeHtml(c.luogo)}</td>
+            <td>
+                ${c.circuito === 'nord-est' ? '🗺️ Nord-Est' :
+                  c.circuito === 'nord-ovest' ? '🗺️ Nord-Ovest' :
+                  c.circuito === 'sud' ? '🗺️ Sud' :
+                  '📦 Corriere Esterno'}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="editClienteInAnagrafica('${c.id}')">✏️ Modifica</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteClienteFromAnagrafica('${c.id}')">🗑️ Elimina</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function refreshAnagraficaTable() {
+    const tbody = document.getElementById('anagraficaTableBody');
+    if (tbody) {
+        tbody.innerHTML = renderAnagraficaTable();
+    }
+}
+
+function closeAnagraficaManager() {
+    const modal = document.getElementById('anagraficaModal');
+    if (modal) modal.remove();
+}
+
+function showAddClienteForm() {
+    const azienda = prompt('Inserisci nome Azienda/Cliente:');
+    if (!azienda) return;
+
+    const luogo = prompt('Inserisci luogo di destinazione:');
+    if (!luogo) return;
+
+    const circuitoMsg = 'Seleziona circuito geografico:\n1 = Nord-Est\n2 = Nord-Ovest\n3 = Sud\n4 = Corriere Esterno';
+    const circuitoChoice = prompt(circuitoMsg);
+
+    const circuitoMap = {
+        '1': 'nord-est',
+        '2': 'nord-ovest',
+        '3': 'sud',
+        '4': 'corriere'
+    };
+
+    const circuito = circuitoMap[circuitoChoice];
+    if (!circuito) {
+        alert('Scelta non valida!');
+        return;
+    }
+
+    // Check if cliente already exists
+    if (findClienteByAzienda(azienda)) {
+        alert('Cliente già presente in anagrafica!');
+        return;
+    }
+
+    addCliente(azienda, luogo, circuito);
+    populateAnagraficaAutocomplete();
+    refreshAnagraficaTable();
+    showToast('✅ Cliente aggiunto all\'anagrafica', 'success');
+}
+
+function editClienteInAnagrafica(id) {
+    const cliente = anagraficaClienti.find(c => c.id === id);
+    if (!cliente) return;
+
+    const azienda = prompt('Modifica nome Azienda/Cliente:', cliente.azienda);
+    if (!azienda) return;
+
+    const luogo = prompt('Modifica luogo di destinazione:', cliente.luogo);
+    if (!luogo) return;
+
+    const circuitoMsg = `Seleziona circuito geografico:\n1 = Nord-Est\n2 = Nord-Ovest\n3 = Sud\n4 = Corriere Esterno\n\nAttuale: ${cliente.circuito}`;
+    const circuitoChoice = prompt(circuitoMsg);
+
+    const circuitoMap = {
+        '1': 'nord-est',
+        '2': 'nord-ovest',
+        '3': 'sud',
+        '4': 'corriere'
+    };
+
+    const circuito = circuitoMap[circuitoChoice];
+    if (!circuito) {
+        alert('Scelta non valida!');
+        return;
+    }
+
+    updateCliente(id, azienda, luogo, circuito);
+    populateAnagraficaAutocomplete();
+    refreshAnagraficaTable();
+    showToast('✅ Cliente modificato', 'success');
+}
+
+function deleteClienteFromAnagrafica(id) {
+    const cliente = anagraficaClienti.find(c => c.id === id);
+    if (!cliente) return;
+
+    if (!confirm(`Sei sicuro di voler eliminare "${cliente.azienda}" dall'anagrafica?`)) return;
+
+    deleteCliente(id);
+    populateAnagraficaAutocomplete();
+    refreshAnagraficaTable();
+    showToast('Cliente eliminato dall\'anagrafica', 'success');
+}
+
+// ==========================================
 // TOAST NOTIFICATIONS
 // ==========================================
 
@@ -1136,6 +1453,11 @@ window.onclick = function(event) {
     if (event.target === mapsModal) {
         closeMapsModal();
     }
+
+    const anagraficaModal = document.getElementById('anagraficaModal');
+    if (event.target === anagraficaModal) {
+        closeAnagraficaManager();
+    }
 };
 
 // Keyboard shortcuts
@@ -1145,6 +1467,7 @@ document.addEventListener('keydown', function(e) {
         closePostItForm();
         closeUserManagement();
         closeMapsModal();
+        closeAnagraficaManager();
     }
 
     // Ctrl/Cmd + N to create new post-it (admin only)
