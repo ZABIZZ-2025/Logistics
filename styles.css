@@ -726,56 +726,8 @@ body {
 }
 
 /* ==========================================
-   RESPONSIVE
+   RESPONSIVE (consolidated below at line ~1105)
    ========================================== */
-
-@media (max-width: 1400px) {
-    .kanban-board {
-        grid-template-columns: repeat(3, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 1024px) {
-    .main-container {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        order: 2;
-    }
-
-    .kanban-board {
-        grid-template-columns: repeat(2, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .header-actions {
-        justify-content: center;
-    }
-
-    .logo-section h1 {
-        font-size: 1.25rem;
-    }
-
-    .kanban-board {
-        grid-template-columns: 1fr;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .modal-content {
-        width: 95%;
-        max-height: 95vh;
-    }
-}
 
 /* ==========================================
    PRINT STYLES
@@ -1104,12 +1056,33 @@ body {
 }
 
 /* ==========================================
-   RESPONSIVE UPDATES FOR 7 COLUMNS
+   RESPONSIVE - All breakpoints consolidated
    ========================================== */
 
 @media (max-width: 1600px) {
     .kanban-board {
         grid-template-columns: repeat(4, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 1400px) {
+    .kanban-board {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+    }
+
+    .footer-content,
+    .top-bar-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .maps-export-section {
+        flex-direction: row;
+        align-items: center;
     }
 }
 
@@ -1120,23 +1093,63 @@ body {
 }
 
 @media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        order: 2;
+    }
+
     .kanban-board {
-        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .logo-section h1 {
+        font-size: 1.25rem;
+    }
+
     .kanban-board {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+    }
+
+    .form-grid {
         grid-template-columns: 1fr;
     }
-    
+
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
     .user-container {
         padding: 1rem;
     }
-    
+
     .user-info {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .top-bar-content {
+        padding: 0.5rem;
     }
 }
 
@@ -1425,44 +1438,8 @@ body {
 }
 
 /* ==========================================
-   RESPONSIVE FOR FOOTER LAYOUT
+   RESPONSIVE FOR FOOTER LAYOUT - Consolidated above
    ========================================== */
-
-@media (max-width: 1400px) {
-    .kanban-board {
-        grid-template-columns: repeat(4, minmax(160px, 1fr)) !important;
-    }
-    
-    .footer-content {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 1024px) {
-    .kanban-board {
-        grid-template-columns: repeat(3, minmax(160px, 1fr)) !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .kanban-board {
-        grid-template-columns: repeat(2, minmax(150px, 1fr)) !important;
-    }
-    
-    .header-actions {
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
 /* ==========================================
    TOP BAR STICKY (Second Row)
@@ -1526,34 +1503,8 @@ body {
 }
 
 /* ==========================================
-   RESPONSIVE TOP BAR
+   RESPONSIVE TOP BAR - Consolidated above
    ========================================== */
-
-@media (max-width: 1400px) {
-    .top-bar-content {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .maps-export-section {
-        flex-direction: row;
-        align-items: center;
-    }
-}
-
-@media (max-width: 768px) {
-    .top-bar-content {
-        padding: 0.5rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 
 /* Remove old footer styles */
 .sidebar-footer {

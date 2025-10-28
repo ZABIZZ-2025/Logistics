@@ -249,8 +249,8 @@ function createUserInterface() {
     // Show user's requests
     renderUserRequests();
 
-    // Setup autofill from anagrafica
-    setTimeout(() => setupAnagraficaAutofill(), 100);
+    // Setup autofill from anagrafica (DOM is ready, no timeout needed)
+    setupAnagraficaAutofill();
 }
 
 function renderUserInterface() {
@@ -787,8 +787,8 @@ function openPostItForm() {
     document.getElementById('postItId').value = '';
     document.getElementById('modalTitle').textContent = '📝 Nuovo Viaggio - Post-it Virtuale';
 
-    // Setup autofill from anagrafica
-    setTimeout(() => setupAnagraficaAutofill(), 100);
+    // Setup autofill from anagrafica (modal is visible, elements are ready)
+    setupAnagraficaAutofill();
 }
 
 function closePostItForm() {
