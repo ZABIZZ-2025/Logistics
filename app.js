@@ -490,7 +490,7 @@ function createPostItElement(viaggio) {
         'entrambi': '🔄'
     };
 
-    // Compact version
+    // Ultra compact version with merce and motivo visible
     div.innerHTML = `
         <div class="post-it-header">
             ${viaggio.urgente ? '<span class="post-it-urgente-badge">⚠️</span>' : ''}
@@ -504,11 +504,13 @@ function createPostItElement(viaggio) {
         </div>
         <div class="post-it-body">
             <div class="post-it-azienda">${escapeHtml(viaggio.azienda)}</div>
-            <div class="post-it-compact">
-                📍 ${escapeHtml(viaggio.luogo)}<br>
-                ⏰ ${viaggio.orario} | ${circuitoIcon[viaggio.circuito]}<br>
-                ${motivoIcon[viaggio.motivo]} ${viaggio.volume || 0}pz / ${viaggio.peso || 0}kg
+            <div class="post-it-info">
+                <span class="post-it-info-item">📍 ${escapeHtml(viaggio.luogo)}</span>
+                <span class="post-it-info-item">⏰ ${viaggio.orario}</span>
+                <span class="post-it-info-item">${circuitoIcon[viaggio.circuito]}</span>
             </div>
+            <div class="post-it-merce">📦 ${escapeHtml(viaggio.merce)}</div>
+            <div class="post-it-motivo">${motivoIcon[viaggio.motivo]} ${viaggio.volume || 0}pz / ${viaggio.peso || 0}kg</div>
             ${viaggio.note ? `<div class="post-it-note">📝 ${escapeHtml(viaggio.note)}</div>` : ''}
         </div>
     `;
