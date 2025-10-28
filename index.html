@@ -18,6 +18,7 @@
                 <h1>RBS LOGISTICA SMART</h1>
             </div>
             <div class="header-actions">
+                <div id="userInfo" class="user-info"></div>
                 <button class="btn btn-secondary" onclick="exportData()">
                     <span class="icon">📥</span> Esporta Dati
                 </button>
@@ -40,6 +41,10 @@
                 <div class="stat-item">
                     <span class="stat-label">Viaggi Totali:</span>
                     <span class="stat-value" id="statTotal">0</span>
+                </div>
+                <div class="stat-item pending">
+                    <span class="stat-label">⏳ Richieste:</span>
+                    <span class="stat-value" id="statRichieste">0</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Pianificati:</span>
@@ -102,6 +107,17 @@
 
             <!-- Kanban Grid -->
             <div class="kanban-board">
+                <!-- Colonna 0: RICHIESTE DA APPROVARE -->
+                <div class="kanban-column" data-column="richieste">
+                    <div class="column-header richieste">
+                        <h3>⏳ RICHIESTE</h3>
+                        <span class="column-count" id="count-richieste">0</span>
+                    </div>
+                    <div class="column-content" id="col-richieste" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
                 <!-- Colonna 1: PIANIFICATO -->
                 <div class="kanban-column" data-column="pianificato">
                     <div class="column-header pianificato">
