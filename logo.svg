@@ -1,0 +1,22 @@
+<svg width="200" height="50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="50" fill="#ff6b35" rx="5"/>
+
+  <!-- RBS Text -->
+  <text x="15" y="32" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">
+    RBS
+  </text>
+
+  <!-- 1979 Text -->
+  <text x="80" y="32" font-family="Arial, sans-serif" font-size="20" font-weight="normal" fill="white">
+    1979
+  </text>
+
+  <!-- Truck Icon -->
+  <g transform="translate(150, 12)">
+    <rect x="0" y="10" width="20" height="12" fill="white" rx="2"/>
+    <rect x="20" y="15" width="10" height="7" fill="white" rx="1"/>
+    <circle cx="6" cy="24" r="3" fill="white"/>
+    <circle cx="24" cy="24" r="3" fill="white"/>
+  </g>
+</svg>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBS Logistica Smart - Gestione Viaggi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff6b35">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="logo.svg" alt="RBS 1979" class="logo" onerror="this.style.display='none'">
+                <h1>RBS LOGISTICA SMART</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <span class="icon">📥</span> Esporta Dati
+                </button>
+                <button class="btn btn-secondary" onclick="importData()">
+                    <span class="icon">📤</span> Importa Dati
+                </button>
+                <button class="btn btn-primary" onclick="openPostItForm()">
+                    <span class="icon">➕</span> Nuovo Viaggio
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar - Filtri e Statistiche -->
+        <aside class="sidebar">
+            <div class="stats-card">
+                <h3>📊 Statistiche Oggi</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Viaggi Totali:</span>
+                    <span class="stat-value" id="statTotal">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pianificati:</span>
+                    <span class="stat-value" id="statPianificati">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">In Corso:</span>
+                    <span class="stat-value" id="statInCorso">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Completati:</span>
+                    <span class="stat-value" id="statCompletati">0</span>
+                </div>
+                <div class="stat-item urgente">
+                    <span class="stat-label">🔴 Urgenze:</span>
+                    <span class="stat-value" id="statUrgenze">0</span>
+                </div>
+            </div>
+
+            <div class="filter-card">
+                <h3>🔍 Filtri</h3>
+                <div class="filter-group">
+                    <label>Cerca:</label>
+                    <input type="text" id="searchFilter" placeholder="Cliente, luogo..." oninput="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>Circuito:</label>
+                    <select id="circuitFilter" onchange="applyFilters()">
+                        <option value="">Tutti</option>
+                        <option value="nord-est">Nord-Est</option>
+                        <option value="nord-ovest">Nord-Ovest</option>
+                        <option value="sud">Sud</option>
+                        <option value="corriere">Corriere</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Solo Urgenti:</label>
+                    <input type="checkbox" id="urgentFilter" onchange="applyFilters()">
+                </div>
+                <button class="btn btn-secondary btn-block" onclick="clearFilters()">Pulisci Filtri</button>
+            </div>
+
+            <div class="legend-card">
+                <h3>📋 Legenda</h3>
+                <div class="legend-item">
+                    <span class="badge badge-normale">🟢</span> Normale
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-urgente">🔴</span> Urgente
+                </div>
+                <div class="legend-item">
+                    <span class="badge badge-corriere">📦</span> Corriere
+                </div>
+            </div>
+        </aside>
+
+        <!-- Kanban Board -->
+        <main class="kanban-container">
+            <h2 class="kanban-title">📌 KANBAN - Gestione Viaggi</h2>
+
+            <!-- Kanban Grid -->
+            <div class="kanban-board">
+                <!-- Colonna 1: PIANIFICATO -->
+                <div class="kanban-column" data-column="pianificato">
+                    <div class="column-header pianificato">
+                        <h3>📋 PIANIFICATO</h3>
+                        <span class="column-count" id="count-pianificato">0</span>
+                    </div>
+                    <div class="column-content" id="col-pianificato" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 2: IN CORSO -->
+                <div class="kanban-column" data-column="in-corso">
+                    <div class="column-header in-corso">
+                        <h3>🚚 IN CORSO</h3>
+                        <span class="column-count" id="count-in-corso">0</span>
+                    </div>
+                    <div class="column-content" id="col-in-corso" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 3: CORRIERE ESTERNO -->
+                <div class="kanban-column" data-column="corriere">
+                    <div class="column-header corriere">
+                        <h3>📦 CORRIERE ESTERNO</h3>
+                        <span class="column-count" id="count-corriere">0</span>
+                    </div>
+                    <div class="column-content" id="col-corriere" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 4: URGENZE -->
+                <div class="kanban-column" data-column="urgenze">
+                    <div class="column-header urgenze">
+                        <h3>⚠️ URGENZE</h3>
+                        <span class="column-count" id="count-urgenze">0</span>
+                    </div>
+                    <div class="column-content" id="col-urgenze" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 5: RIMANDA DOMANI -->
+                <div class="kanban-column" data-column="rimanda">
+                    <div class="column-header rimanda">
+                        <h3>⏰ RIMANDA DOMANI</h3>
+                        <span class="column-count" id="count-rimanda">0</span>
+                    </div>
+                    <div class="column-content" id="col-rimanda" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 6: COMPLETATO -->
+                <div class="kanban-column" data-column="completato">
+                    <div class="column-header completato">
+                        <h3>✅ COMPLETATO</h3>
+                        <span class="column-count" id="count-completato">0</span>
+                    </div>
+                    <div class="column-content" id="col-completato" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Form Nuovo Post-it -->
+    <div id="postItModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">📝 Nuovo Viaggio - Post-it Virtuale</h2>
+                <button class="close-btn" onclick="closePostItForm()">&times;</button>
+            </div>
+            <form id="postItForm" onsubmit="savePostIt(event)">
+                <input type="hidden" id="postItId">
+
+                <div class="form-grid">
+                    <!-- Campo 1: URGENTE -->
+                    <div class="form-group full-width">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="urgente" onchange="toggleUrgentStyle()">
+                            <span class="checkbox-custom">⚠️ URGENTE</span>
+                        </label>
+                    </div>
+
+                    <!-- Campo 2: AZIENDA -->
+                    <div class="form-group">
+                        <label for="azienda">Azienda/Cliente *</label>
+                        <input type="text" id="azienda" required placeholder="es. CLIENTE BETA" list="aziendaList">
+                        <datalist id="aziendaList"></datalist>
+                    </div>
+
+                    <!-- Campo 3: LUOGO -->
+                    <div class="form-group">
+                        <label for="luogo">Luogo Destinazione *</label>
+                        <input type="text" id="luogo" required placeholder="es. Milano, zona centro" list="luogoList">
+                        <datalist id="luogoList"></datalist>
+                    </div>
+
+                    <!-- Campo 4: ORARIO -->
+                    <div class="form-group">
+                        <label for="orario">Orario Richiesto *</label>
+                        <input type="time" id="orario" required>
+                    </div>
+
+                    <!-- Campo 5: CIRCUITO -->
+                    <div class="form-group">
+                        <label for="circuito">Circuito Geografico *</label>
+                        <select id="circuito" required>
+                            <option value="">Seleziona circuito</option>
+                            <option value="nord-est">🗺️ Nord-Est</option>
+                            <option value="nord-ovest">🗺️ Nord-Ovest</option>
+                            <option value="sud">🗺️ Sud</option>
+                            <option value="corriere">📦 Corriere Esterno</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo 6: MERCE -->
+                    <div class="form-group full-width">
+                        <label for="merce">Descrizione Merce *</label>
+                        <textarea id="merce" required placeholder="es. Capi abbigliamento lusso, collezione primavera" rows="2"></textarea>
+                    </div>
+
+                    <!-- Campo 7: PESO/VOLUME -->
+                    <div class="form-group">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" placeholder="es. 15" min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="volume">Numero Pacchi</label>
+                        <input type="number" id="volume" placeholder="es. 3" min="0" step="1">
+                    </div>
+
+                    <!-- Campo 8: MOTIVO -->
+                    <div class="form-group full-width">
+                        <label>Motivo Viaggio *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="ritiro" required>
+                                <span>📥 Ritiro</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="consegna" required>
+                                <span>📤 Consegna</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="entrambi" required>
+                                <span>🔄 Ritiro + Consegna</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Note aggiuntive -->
+                    <div class="form-group full-width">
+                        <label for="note">Note Aggiuntive (opzionale)</label>
+                        <textarea id="note" placeholder="es. Consegnare al piano -1, suonare citofono..." rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePostItForm()">Annulla</button>
+                    <button type="submit" class="btn btn-primary">💾 Salva Post-it</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
