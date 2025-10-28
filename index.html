@@ -32,6 +32,80 @@
         </div>
     </header>
 
+    <!-- Top Bar - Statistiche, Filtri e Legenda (Sticky) -->
+    <div class="top-bar-sticky">
+        <div class="top-bar-content">
+            <!-- Statistiche -->
+            <div class="stats-compact">
+                <h4>📊 Stats</h4>
+                <div class="stats-grid">
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Totali</span>
+                        <span class="stat-value-compact" id="statTotal">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">⏳ Richieste</span>
+                        <span class="stat-value-compact" id="statRichieste">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Pianificati</span>
+                        <span class="stat-value-compact" id="statPianificati">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">In Corso</span>
+                        <span class="stat-value-compact" id="statInCorso">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Completati</span>
+                        <span class="stat-value-compact" id="statCompletati">0</span>
+                    </div>
+                    <div class="stat-compact urgente">
+                        <span class="stat-label-compact">🔴 Urgenze</span>
+                        <span class="stat-value-compact" id="statUrgenze">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtri -->
+            <div class="filters-compact">
+                <h4>🔍 Filtri</h4>
+                <div class="filters-row">
+                    <input type="text" id="searchFilter" placeholder="Cerca..." oninput="applyFilters()">
+                    <select id="circuitFilter" onchange="applyFilters()">
+                        <option value="">Tutti Circuiti</option>
+                        <option value="nord-est">Nord-Est</option>
+                        <option value="nord-ovest">Nord-Ovest</option>
+                        <option value="sud">Sud</option>
+                        <option value="corriere">Corriere</option>
+                    </select>
+                    <label class="checkbox-compact">
+                        <input type="checkbox" id="urgentFilter" onchange="applyFilters()">
+                        <span>Solo Urgenti</span>
+                    </label>
+                    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Pulisci</button>
+                </div>
+            </div>
+
+            <!-- Legenda -->
+            <div class="legend-compact">
+                <h4>📋 Legenda</h4>
+                <div class="legend-row">
+                    <span class="badge badge-normale">🟢 Normale</span>
+                    <span class="badge badge-urgente">🔴 Urgente</span>
+                    <span class="badge badge-corriere">📦 Corriere</span>
+                </div>
+            </div>
+
+            <!-- Export Maps Button -->
+            <div class="maps-export-section">
+                <h4>🗺️ Percorso</h4>
+                <button class="btn btn-primary btn-sm" onclick="exportToGoogleMaps()">
+                    <span class="icon">📍</span> Esporta su Maps
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Kanban Board -->
     <main class="kanban-container">
             <h2 class="kanban-title">📌 KANBAN - Gestione Viaggi</h2>
@@ -116,72 +190,6 @@
                 </div>
             </div>
     </main>
-
-    <!-- Footer - Statistiche, Filtri e Legenda -->
-    <footer class="sidebar-footer">
-        <div class="footer-content">
-            <!-- Statistiche -->
-            <div class="stats-compact">
-                <h4>📊 Stats</h4>
-                <div class="stats-grid">
-                    <div class="stat-compact">
-                        <span class="stat-label-compact">Totali</span>
-                        <span class="stat-value-compact" id="statTotal">0</span>
-                    </div>
-                    <div class="stat-compact">
-                        <span class="stat-label-compact">⏳ Richieste</span>
-                        <span class="stat-value-compact" id="statRichieste">0</span>
-                    </div>
-                    <div class="stat-compact">
-                        <span class="stat-label-compact">Pianificati</span>
-                        <span class="stat-value-compact" id="statPianificati">0</span>
-                    </div>
-                    <div class="stat-compact">
-                        <span class="stat-label-compact">In Corso</span>
-                        <span class="stat-value-compact" id="statInCorso">0</span>
-                    </div>
-                    <div class="stat-compact">
-                        <span class="stat-label-compact">Completati</span>
-                        <span class="stat-value-compact" id="statCompletati">0</span>
-                    </div>
-                    <div class="stat-compact urgente">
-                        <span class="stat-label-compact">🔴 Urgenze</span>
-                        <span class="stat-value-compact" id="statUrgenze">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filtri -->
-            <div class="filters-compact">
-                <h4>🔍 Filtri</h4>
-                <div class="filters-row">
-                    <input type="text" id="searchFilter" placeholder="Cerca..." oninput="applyFilters()">
-                    <select id="circuitFilter" onchange="applyFilters()">
-                        <option value="">Tutti Circuiti</option>
-                        <option value="nord-est">Nord-Est</option>
-                        <option value="nord-ovest">Nord-Ovest</option>
-                        <option value="sud">Sud</option>
-                        <option value="corriere">Corriere</option>
-                    </select>
-                    <label class="checkbox-compact">
-                        <input type="checkbox" id="urgentFilter" onchange="applyFilters()">
-                        <span>Solo Urgenti</span>
-                    </label>
-                    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Pulisci</button>
-                </div>
-            </div>
-
-            <!-- Legenda -->
-            <div class="legend-compact">
-                <h4>📋 Legenda</h4>
-                <div class="legend-row">
-                    <span class="badge badge-normale">🟢 Normale</span>
-                    <span class="badge badge-urgente">🔴 Urgente</span>
-                    <span class="badge badge-corriere">📦 Corriere</span>
-                </div>
-            </div>
-        </div>
-    </footer>
 
     <!-- Modal: Form Nuovo Post-it -->
     <div id="postItModal" class="modal">

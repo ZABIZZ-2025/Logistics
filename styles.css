@@ -1453,3 +1453,99 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ==========================================
+   TOP BAR STICKY (Second Row)
+   ========================================== */
+
+.top-bar-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    background: white;
+    border-bottom: 2px solid var(--gray-300);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.top-bar-content {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr auto;
+    gap: 1.5rem;
+    max-width: 100%;
+    align-items: start;
+    padding: 0.75rem 1rem;
+}
+
+/* Maps Export Section */
+.maps-export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.maps-export-section h4 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--gray-700);
+}
+
+/* Kanban container adjustment for sticky bar */
+.kanban-container {
+    min-height: calc(100vh - 200px) !important;
+}
+
+.kanban-board {
+    min-height: calc(100vh - 240px) !important;
+}
+
+.column-content {
+    min-height: calc(100vh - 280px) !important;
+}
+
+/* ==========================================
+   MOTIVO MORE VISIBLE IN POST-IT
+   ========================================== */
+
+.post-it-motivo {
+    background: var(--gray-100);
+    padding: 0.25rem 0.4rem;
+    border-radius: 4px;
+    margin-top: 0.3rem;
+    display: inline-block;
+}
+
+/* ==========================================
+   RESPONSIVE TOP BAR
+   ========================================== */
+
+@media (max-width: 1400px) {
+    .top-bar-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .maps-export-section {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-bar-content {
+        padding: 0.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Remove old footer styles */
+.sidebar-footer {
+    display: none !important;
+}
