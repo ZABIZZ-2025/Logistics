@@ -402,6 +402,11 @@ body {
     opacity: 0.5;
 }
 
+.post-it.drag-over-item {
+    border-top: 3px solid var(--primary-color);
+    margin-top: -3px;
+}
+
 .post-it-header {
     display: flex;
     justify-content: space-between;

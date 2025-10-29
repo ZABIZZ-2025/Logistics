@@ -321,6 +321,7 @@ function saveUserPostIt(event) {
         id: generateId(),
         ...viaggioData,
         column: 'richieste', // Goes to pending approval
+        order: Date.now(), // Use timestamp for initial order
         createdBy: currentSession.userId,
         createdByName: currentSession.name,
         createdAt: new Date().toISOString(),
@@ -374,6 +375,7 @@ function saveData() {
 function createSampleData() {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    const baseTime = Date.now();
 
     return [
         {
@@ -390,6 +392,7 @@ function createSampleData() {
             motivo: 'consegna',
             note: '',
             column: 'pianificato',
+            order: baseTime,
             createdAt: new Date().toISOString(),
             createdBy: 'admin1'
         },
@@ -407,6 +410,7 @@ function createSampleData() {
             motivo: 'consegna',
             note: 'Urgente',
             column: 'urgenze',
+            order: baseTime + 1,
             createdAt: new Date().toISOString(),
             createdBy: 'admin1'
         },
@@ -424,6 +428,7 @@ function createSampleData() {
             motivo: 'ritiro',
             note: '',
             column: 'richieste',
+            order: baseTime + 2,
             createdAt: new Date().toISOString(),
             createdBy: 'user1',
             createdByName: 'Utente Standard',
@@ -597,6 +602,14 @@ function renderKanban() {
     // Filter viaggi
     const filteredViaggi = applyFiltersToData();
 
+    // Sort viaggi by order field (for manual reordering within columns)
+    filteredViaggi.sort((a, b) => {
+        // Ensure order field exists, use createdAt timestamp as fallback
+        const orderA = a.order || new Date(a.createdAt).getTime();
+        const orderB = b.order || new Date(b.createdAt).getTime();
+        return orderA - orderB;
+    });
+
     // Render each viaggio
     filteredViaggi.forEach(viaggio => {
         const postItElement = createPostItElement(viaggio);
@@ -645,6 +658,9 @@ function createPostItElement(viaggio) {
     if (isAdmin()) {
         div.addEventListener('dragstart', dragStart);
         div.addEventListener('dragend', dragEnd);
+        div.addEventListener('dragover', dragOverPostIt);
+        div.addEventListener('drop', dropOnPostIt);
+        div.addEventListener('dragleave', dragLeavePostIt);
     }
 
     const circuitoIcon = {
@@ -775,6 +791,90 @@ function drop(ev) {
     }
 }
 
+// Drag over post-it (for reordering within same column)
+function dragOverPostIt(ev) {
+    if (!isAdmin()) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const draggingElement = document.querySelector('.dragging');
+    const currentElement = ev.currentTarget;
+
+    if (draggingElement && draggingElement !== currentElement) {
+        currentElement.classList.add('drag-over-item');
+    }
+}
+
+// Drag leave post-it
+function dragLeavePostIt(ev) {
+    if (!isAdmin()) return;
+    ev.currentTarget.classList.remove('drag-over-item');
+}
+
+// Drop on post-it (reorder within column)
+function dropOnPostIt(ev) {
+    if (!isAdmin()) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+    ev.currentTarget.classList.remove('drag-over-item');
+
+    const draggedId = ev.dataTransfer.getData('text/plain');
+    const targetId = ev.currentTarget.dataset.id;
+
+    if (draggedId === targetId) return;
+
+    const draggedViaggio = viaggi.find(v => v.id === draggedId);
+    const targetViaggio = viaggi.find(v => v.id === targetId);
+
+    if (!draggedViaggio || !targetViaggio) return;
+
+    // If different columns, move to new column
+    if (draggedViaggio.column !== targetViaggio.column) {
+        draggedViaggio.column = targetViaggio.column;
+
+        // Mark as approved if moving from richieste
+        if (draggedViaggio.status === 'pending') {
+            draggedViaggio.status = 'approved';
+            draggedViaggio.approvedBy = currentSession.userId;
+            draggedViaggio.approvedAt = new Date().toISOString();
+        }
+    }
+
+    // Reorder: insert dragged item before or after target based on mouse position
+    const rect = ev.currentTarget.getBoundingClientRect();
+    const mouseY = ev.clientY;
+    const middle = rect.top + rect.height / 2;
+    const insertBefore = mouseY < middle;
+
+    // Get all viaggi in the target column, sorted by order
+    const columnViaggi = viaggi
+        .filter(v => v.column === targetViaggio.column)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+    // Remove dragged item from array
+    const draggedIndex = columnViaggi.findIndex(v => v.id === draggedId);
+    if (draggedIndex !== -1) {
+        columnViaggi.splice(draggedIndex, 1);
+    }
+
+    // Find target position
+    const targetIndex = columnViaggi.findIndex(v => v.id === targetId);
+    const insertIndex = insertBefore ? targetIndex : targetIndex + 1;
+
+    // Insert dragged item at new position
+    columnViaggi.splice(insertIndex, 0, draggedViaggio);
+
+    // Update order for all items in column
+    columnViaggi.forEach((v, index) => {
+        v.order = Date.now() + index;
+    });
+
+    saveData();
+    renderKanban();
+    updateStats();
+}
+
 // ==========================================
 // POST-IT FORM MODAL (ADMIN ONLY)
 // ==========================================
@@ -839,6 +939,7 @@ function savePostIt(event) {
             id: generateId(),
             ...viaggioData,
             column: 'richieste',
+            order: Date.now(), // Use timestamp for initial order
             createdAt: new Date().toISOString(),
             createdBy: currentSession.userId,
             createdByName: currentSession.name
