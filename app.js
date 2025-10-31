@@ -11,6 +11,8 @@ let currentFilters = {
     urgentOnly: false
 };
 let anagraficaClienti = [];
+let lastDataUpdate = Date.now();
+let autoRefreshInterval = null;
 
 // ==========================================
 // AUTHENTICATION & SESSION
@@ -74,7 +76,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     populateAutocomplete();
     populateAnagraficaAutocomplete();
-    console.log('✅ RBS Logistica Smart inizializzata');
+
+    // Start auto-refresh for data synchronization
+    startAutoRefresh();
+
+    // Listen for storage changes (works across tabs in same browser)
+    window.addEventListener('storage', handleStorageChange);
+
+    console.log('✅ RBS Logistica Smart inizializzata con auto-refresh');
 });
 
 function initializeUI() {
@@ -362,16 +371,6 @@ function loadData() {
     }
 }
 
-function saveData() {
-    try {
-        localStorage.setItem('rbs_viaggi', JSON.stringify(viaggi));
-        console.log('💾 Dati salvati');
-    } catch (e) {
-        console.error('Errore nel salvataggio:', e);
-        showToast('Errore nel salvataggio dei dati', 'error');
-    }
-}
-
 function createSampleData() {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -442,6 +441,89 @@ function generateId() {
 }
 
 // ==========================================
+// AUTO-REFRESH & SYNC (for multi-user)
+// ==========================================
+
+function startAutoRefresh() {
+    // Check for data changes every 5 seconds
+    autoRefreshInterval = setInterval(() => {
+        checkAndRefreshData();
+    }, 5000);
+
+    console.log('🔄 Auto-refresh attivato (ogni 5 secondi)');
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+}
+
+function checkAndRefreshData() {
+    // Get timestamp of last modification from localStorage
+    const lastModified = localStorage.getItem('rbs_last_modified');
+
+    if (lastModified && parseInt(lastModified) > lastDataUpdate) {
+        console.log('🔄 Rilevati cambiamenti nei dati, aggiornamento...');
+        reloadAllData();
+    }
+}
+
+function reloadAllData() {
+    // Reload data from localStorage
+    loadData();
+    loadAnagraficaClienti();
+
+    // Update UI based on role
+    if (isAdmin()) {
+        renderKanban();
+        updateStats();
+    } else {
+        renderUserRequests();
+    }
+
+    // Update autocomplete
+    populateAutocomplete();
+    populateAnagraficaAutocomplete();
+
+    // Update last refresh timestamp
+    lastDataUpdate = Date.now();
+
+    console.log('✅ Dati aggiornati');
+}
+
+function handleStorageChange(e) {
+    // Handle storage events from other tabs
+    if (e.key === 'rbs_viaggi' || e.key === 'rbs_anagrafica' || e.key === 'rbs_users') {
+        console.log('🔄 Storage modificato in altra tab, aggiornamento...');
+        reloadAllData();
+    }
+}
+
+function saveData() {
+    try {
+        localStorage.setItem('rbs_viaggi', JSON.stringify(viaggi));
+        localStorage.setItem('rbs_last_modified', Date.now().toString());
+        console.log('💾 Dati salvati');
+    } catch (e) {
+        console.error('Errore nel salvataggio:', e);
+        showToast('Errore nel salvataggio dei dati', 'error');
+    }
+}
+
+function saveAnagraficaClienti() {
+    try {
+        localStorage.setItem('rbs_anagrafica', JSON.stringify(anagraficaClienti));
+        localStorage.setItem('rbs_last_modified', Date.now().toString());
+        console.log('💾 Anagrafica clienti salvata');
+    } catch (e) {
+        console.error('Errore nel salvataggio anagrafica:', e);
+        showToast('Errore nel salvataggio anagrafica', 'error');
+    }
+}
+
+// ==========================================
 // ANAGRAFICA CLIENTI
 // ==========================================
 
@@ -459,16 +541,6 @@ function loadAnagraficaClienti() {
         // Dati di esempio per la demo
         anagraficaClienti = createSampleAnagrafica();
         saveAnagraficaClienti();
-    }
-}
-
-function saveAnagraficaClienti() {
-    try {
-        localStorage.setItem('rbs_anagrafica', JSON.stringify(anagraficaClienti));
-        console.log('💾 Anagrafica clienti salvata');
-    } catch (e) {
-        console.error('Errore nel salvataggio anagrafica:', e);
-        showToast('Errore nel salvataggio anagrafica', 'error');
     }
 }
 
@@ -1354,6 +1426,7 @@ function addNewUser() {
 
     users.push(newUser);
     localStorage.setItem('rbs_users', JSON.stringify(users));
+    localStorage.setItem('rbs_last_modified', Date.now().toString());
 
     showToast('Utente creato con successo', 'success');
     closeUserManagement();
@@ -1368,6 +1441,7 @@ function deleteUser(userId) {
 
     users = users.filter(u => u.id !== userId);
     localStorage.setItem('rbs_users', JSON.stringify(users));
+    localStorage.setItem('rbs_last_modified', Date.now().toString());
 
     showToast('Utente eliminato', 'success');
     closeUserManagement();
