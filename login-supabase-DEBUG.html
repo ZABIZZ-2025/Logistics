@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login DEBUG - RBS Logistica Smart</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem;
+            width: 100%;
+            max-width: 550px;
+            margin: 1rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo {
+            max-height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .login-form {
+            margin-top: 2rem;
+        }
+
+        .login-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .login-form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background: #e85a2a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .login-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-error {
+            background: #fee;
+            color: #c33;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-success {
+            background: #efe;
+            color: #363;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .login-success.show {
+            display: block;
+        }
+
+        .login-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .login-info strong {
+            color: var(--gray-900);
+        }
+
+        .user-list {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        /* DEBUG LOG */
+        .debug-log {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #000;
+            color: #0f0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .debug-log-title {
+            color: #ff0;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .debug-log-entry {
+            margin-bottom: 0.25rem;
+        }
+
+        .debug-log-error {
+            color: #f00;
+        }
+
+        .debug-log-success {
+            color: #0f0;
+        }
+
+        .debug-log-info {
+            color: #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="logo.svg" alt="RBS 1979" class="login-logo" onerror="this.style.display='none'">
+            <h1 class="login-title">RBS Logistica Smart</h1>
+            <p class="login-subtitle">🔍 MODALITÀ DEBUG - Sistema di Gestione Viaggi</p>
+        </div>
+
+        <div class="login-error" id="loginError"></div>
+        <div class="login-success" id="loginSuccess"></div>
+
+        <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+            <div class="login-form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required autofocus placeholder="es. admin@rbslogistica.local">
+            </div>
+
+            <div class="login-form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Inserisci password">
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">🔐 Accedi</button>
+        </form>
+
+        <div class="login-info">
+            <strong>ℹ️ Utenti di Default:</strong>
+            <div class="user-list">
+                <strong>Admin:</strong> admin@rbslogistica.local / admin123<br>
+                <strong>Utente:</strong> user@rbslogistica.local / user123
+            </div>
+        </div>
+
+        <!-- DEBUG LOG -->
+        <div class="debug-log" id="debugLog">
+            <div class="debug-log-title">🔍 DEBUG LOG (Console dettagliata)</div>
+            <div id="debugLogEntries"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ==========================================
+        // DEBUG LOGGER
+        // ==========================================
+        function debugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntries = document.getElementById('debugLogEntries');
+            const entry = document.createElement('div');
+            entry.className = `debug-log-entry debug-log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logEntries.appendChild(entry);
+            logEntries.scrollTop = logEntries.scrollHeight;
+
+            // Also log to console
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        debugLog('🚀 Applicazione avviata', 'info');
+
+        // ==========================================
+        // SUPABASE IMPORT
+        // ==========================================
+        debugLog('📦 Importando Supabase client...', 'info');
+
+        let supabase;
+        try {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            debugLog('✅ Supabase client library importata', 'success');
+
+            // Import config
+            debugLog('📝 Importando configurazione...', 'info');
+            const configModule = await import('./supabase-config.js');
+            const SUPABASE_CONFIG = configModule.SUPABASE_CONFIG;
+
+            debugLog(`🔑 URL: ${SUPABASE_CONFIG.url}`, 'info');
+            debugLog(`🔑 API Key inizio: ${SUPABASE_CONFIG.anonKey.substring(0, 20)}...`, 'info');
+
+            // Check if config is valid
+            if (SUPABASE_CONFIG.url === 'YOUR_SUPABASE_URL') {
+                debugLog('❌ ERRORE: supabase-config.js non configurato!', 'error');
+                debugLog('⚠️ Devi modificare supabase-config.js con le tue credenziali', 'error');
+                showError('Configurazione non valida! Verifica supabase-config.js');
+            } else {
+                debugLog('✅ Configurazione valida', 'success');
+            }
+
+            // Create client
+            supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            debugLog('✅ Client Supabase creato', 'success');
+
+        } catch (error) {
+            debugLog(`❌ ERRORE import: ${error.message}`, 'error');
+            console.error('Errore import:', error);
+            showError('Errore caricamento Supabase: ' + error.message);
+        }
+
+        // ==========================================
+        // CHECK EXISTING SESSION
+        // ==========================================
+        async function checkExistingSession() {
+            debugLog('🔍 Controllo sessione esistente...', 'info');
+
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    debugLog(`⚠️ Errore controllo sessione: ${error.message}`, 'error');
+                    return;
+                }
+
+                if (session) {
+                    debugLog('✅ Sessione esistente trovata!', 'success');
+                    debugLog(`👤 User ID: ${session.user.id}`, 'info');
+                    debugLog(`📧 Email: ${session.user.email}`, 'info');
+                    debugLog('🔄 Redirect a index-supabase.html...', 'info');
+
+                    // Already logged in, redirect to app
+                    window.location.href = 'index-supabase.html';
+                } else {
+                    debugLog('ℹ️ Nessuna sessione esistente', 'info');
+                }
+            } catch (error) {
+                debugLog(`❌ ERRORE checkSession: ${error.message}`, 'error');
+                console.error('Errore check session:', error);
+            }
+        }
+
+        // ==========================================
+        // HANDLE LOGIN
+        // ==========================================
+        async function handleLogin(event) {
+            event.preventDefault();
+            debugLog('', 'info');
+            debugLog('═══════════════════════════════════════', 'info');
+            debugLog('🔐 TENTATIVO DI LOGIN', 'info');
+            debugLog('═══════════════════════════════════════', 'info');
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('loginError');
+            const successDiv = document.getElementById('loginSuccess');
+
+            debugLog(`📧 Email: ${email}`, 'info');
+            debugLog(`🔒 Password: ${'*'.repeat(password.length)}`, 'info');
+
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = '⏳ Accesso in corso...';
+            errorDiv.classList.remove('show');
+            successDiv.classList.remove('show');
+
+            try {
+                debugLog('🚀 Chiamata signInWithPassword...', 'info');
+
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                debugLog('📨 Risposta ricevuta da Supabase', 'info');
+
+                if (error) {
+                    debugLog(`❌ ERRORE Supabase Auth: ${error.message}`, 'error');
+                    debugLog(`❌ Codice errore: ${error.status}`, 'error');
+                    throw error;
+                }
+
+                if (!data.session) {
+                    debugLog('❌ ERRORE: Sessione non valida', 'error');
+                    throw new Error('Sessione non valida');
+                }
+
+                debugLog('✅ Autenticazione Supabase riuscita!', 'success');
+                debugLog(`👤 User ID: ${data.user.id}`, 'info');
+                debugLog(`📧 Email: ${data.user.email}`, 'info');
+                debugLog(`🔑 Session token: ${data.session.access_token.substring(0, 20)}...`, 'info');
+
+                // Get user profile to verify role
+                debugLog('🔍 Recupero profilo utente...', 'info');
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profileError) {
+                    debugLog(`❌ ERRORE recupero profilo: ${profileError.message}`, 'error');
+                    debugLog(`❌ Codice errore: ${profileError.code}`, 'error');
+                    debugLog('⚠️ Probabilmente il profilo non è stato inserito in user_profiles', 'error');
+                    throw new Error('Profilo utente non trovato. Hai eseguito la query INSERT INTO user_profiles?');
+                }
+
+                if (!profile) {
+                    debugLog('❌ ERRORE: Profilo vuoto', 'error');
+                    throw new Error('Profilo utente non trovato. Contatta l\'amministratore.');
+                }
+
+                debugLog('✅ Profilo utente recuperato!', 'success');
+                debugLog(`👤 Username: ${profile.username}`, 'info');
+                debugLog(`🎭 Ruolo: ${profile.role}`, 'info');
+                debugLog(`🆔 User ID: ${profile.user_id}`, 'info');
+
+                // Success!
+                debugLog('', 'success');
+                debugLog('═══════════════════════════════════════', 'success');
+                debugLog('🎉 LOGIN COMPLETATO CON SUCCESSO!', 'success');
+                debugLog('═══════════════════════════════════════', 'success');
+
+                successDiv.textContent = `✅ Accesso riuscito! Benvenuto ${profile.username}`;
+                successDiv.classList.add('show');
+
+                debugLog('⏱️ Redirect tra 2 secondi...', 'info');
+
+                // Redirect to app
+                setTimeout(() => {
+                    debugLog('🔄 Redirect a index-supabase.html', 'info');
+                    window.location.href = 'index-supabase.html';
+                }, 2000);
+
+            } catch (error) {
+                debugLog('', 'error');
+                debugLog('═══════════════════════════════════════', 'error');
+                debugLog('❌ LOGIN FALLITO', 'error');
+                debugLog('═══════════════════════════════════════', 'error');
+                debugLog(`Errore: ${error.message}`, 'error');
+                console.error('Errore login:', error);
+
+                let errorMessage = 'Email o password non corretti';
+
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = '❌ Email o password non corretti';
+                    debugLog('💡 SUGGERIMENTO: Verifica che email e password siano corrette', 'info');
+                    debugLog('💡 Email default: admin@rbslogistica.local', 'info');
+                    debugLog('💡 Password default: admin123', 'info');
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = '❌ Email non confermata. Controlla la tua casella email.';
+                    debugLog('💡 SUGGERIMENTO: Abilita "Auto Confirm User" quando crei l\'utente', 'info');
+                } else if (error.message.includes('Profilo utente non trovato')) {
+                    errorMessage = error.message;
+                    debugLog('💡 SUGGERIMENTO: Esegui questa query nel SQL Editor di Supabase:', 'info');
+                    debugLog(`INSERT INTO user_profiles (id, user_id, username, role)`, 'info');
+                    debugLog(`VALUES ('UUID_UTENTE', 'admin', 'Amministratore', 'admin');`, 'info');
+                } else {
+                    errorMessage = `❌ Errore: ${error.message}`;
+                }
+
+                showError(errorMessage);
+
+                // Re-enable button
+                loginBtn.disabled = false;
+                loginBtn.textContent = '🔐 Accedi';
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 10000); // 10 secondi per leggere
+        }
+
+        // Make handleLogin globally accessible
+        window.handleLogin = handleLogin;
+
+        // Check for existing session on load
+        debugLog('🔄 Controllo sessione al caricamento...', 'info');
+        checkExistingSession();
+        debugLog('✅ Pagina di login pronta', 'success');
+    </script>
+</body>
+</html>
