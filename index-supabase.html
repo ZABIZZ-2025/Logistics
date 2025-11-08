@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBS Logistica Smart - Gestione Viaggi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff6b35">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="logo.svg" alt="RBS 1979" class="logo" onerror="this.style.display='none'">
+                <h1>RBS LOGISTICA SMART</h1>
+            </div>
+            <div class="header-actions">
+                <div id="userInfo" class="user-info"></div>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <span class="icon">📥</span> Esporta Dati
+                </button>
+                <button class="btn btn-secondary" onclick="importData()">
+                    <span class="icon">📤</span> Importa Dati
+                </button>
+                <button class="btn btn-primary" onclick="openPostItForm()">
+                    <span class="icon">➕</span> Nuovo Viaggio
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top Bar - Statistiche, Filtri e Legenda (Sticky) -->
+    <div class="top-bar-sticky">
+        <div class="top-bar-content">
+            <!-- Statistiche -->
+            <div class="stats-compact">
+                <h4>📊 Stats</h4>
+                <div class="stats-grid">
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Totali</span>
+                        <span class="stat-value-compact" id="statTotal">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">⏳ Richieste</span>
+                        <span class="stat-value-compact" id="statRichieste">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Pianificati</span>
+                        <span class="stat-value-compact" id="statPianificati">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">In Corso</span>
+                        <span class="stat-value-compact" id="statInCorso">0</span>
+                    </div>
+                    <div class="stat-compact">
+                        <span class="stat-label-compact">Completati</span>
+                        <span class="stat-value-compact" id="statCompletati">0</span>
+                    </div>
+                    <div class="stat-compact urgente">
+                        <span class="stat-label-compact">🔴 Urgenze</span>
+                        <span class="stat-value-compact" id="statUrgenze">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtri -->
+            <div class="filters-compact">
+                <h4>🔍 Filtri</h4>
+                <div class="filters-row">
+                    <input type="text" id="searchFilter" placeholder="Cerca..." oninput="applyFilters()">
+                    <select id="circuitFilter" onchange="applyFilters()">
+                        <option value="">Tutti Circuiti</option>
+                        <option value="nord-est">Nord-Est</option>
+                        <option value="nord-ovest">Nord-Ovest</option>
+                        <option value="sud">Sud</option>
+                        <option value="corriere">Corriere</option>
+                    </select>
+                    <label class="checkbox-compact">
+                        <input type="checkbox" id="urgentFilter" onchange="applyFilters()">
+                        <span>Solo Urgenti</span>
+                    </label>
+                    <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Pulisci</button>
+                </div>
+            </div>
+
+            <!-- Legenda -->
+            <div class="legend-compact">
+                <h4>📋 Legenda</h4>
+                <div class="legend-row">
+                    <span class="badge badge-normale">🟢 Normale</span>
+                    <span class="badge badge-urgente">🔴 Urgente</span>
+                    <span class="badge badge-corriere">📦 Corriere</span>
+                </div>
+            </div>
+
+            <!-- Export Maps Button -->
+            <div class="maps-export-section">
+                <h4>🗺️ Percorso</h4>
+                <button class="btn btn-primary btn-sm" onclick="exportToGoogleMaps()">
+                    <span class="icon">📍</span> Esporta su Maps
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <main class="kanban-container">
+            <!-- Kanban Grid -->
+            <div class="kanban-board">
+                <!-- Colonna 0: RICHIESTE DA APPROVARE -->
+                <div class="kanban-column" data-column="richieste">
+                    <div class="column-header richieste">
+                        <h3>⏳ RICHIESTE</h3>
+                        <span class="column-count" id="count-richieste">0</span>
+                    </div>
+                    <div class="column-content" id="col-richieste" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 1: PIANIFICATO -->
+                <div class="kanban-column" data-column="pianificato">
+                    <div class="column-header pianificato">
+                        <h3>📋 PIANIFICATO</h3>
+                        <span class="column-count" id="count-pianificato">0</span>
+                    </div>
+                    <div class="column-content" id="col-pianificato" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 2: IN CORSO -->
+                <div class="kanban-column" data-column="in-corso">
+                    <div class="column-header in-corso">
+                        <h3>🚚 IN CORSO</h3>
+                        <span class="column-count" id="count-in-corso">0</span>
+                    </div>
+                    <div class="column-content" id="col-in-corso" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 3: CORRIERE ESTERNO -->
+                <div class="kanban-column" data-column="corriere">
+                    <div class="column-header corriere">
+                        <h3>📦 CORRIERE ESTERNO</h3>
+                        <span class="column-count" id="count-corriere">0</span>
+                    </div>
+                    <div class="column-content" id="col-corriere" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 4: URGENZE -->
+                <div class="kanban-column" data-column="urgenze">
+                    <div class="column-header urgenze">
+                        <h3>⚠️ URGENZE</h3>
+                        <span class="column-count" id="count-urgenze">0</span>
+                    </div>
+                    <div class="column-content" id="col-urgenze" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 5: RIMANDA DOMANI -->
+                <div class="kanban-column" data-column="rimanda">
+                    <div class="column-header rimanda">
+                        <h3>⏰ RIMANDA DOMANI</h3>
+                        <span class="column-count" id="count-rimanda">0</span>
+                    </div>
+                    <div class="column-content" id="col-rimanda" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Colonna 6: COMPLETATO -->
+                <div class="kanban-column" data-column="completato">
+                    <div class="column-header completato">
+                        <h3>✅ COMPLETATO</h3>
+                        <span class="column-count" id="count-completato">0</span>
+                    </div>
+                    <div class="column-content" id="col-completato" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <!-- Post-its will be inserted here -->
+                    </div>
+                </div>
+            </div>
+    </main>
+
+    <!-- Main Container for User Interface -->
+    <div class="main-container"></div>
+
+    <!-- Modal: Form Nuovo Post-it -->
+    <div id="postItModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">📝 Nuovo Viaggio - Post-it Virtuale</h2>
+                <button class="close-btn" onclick="closePostItForm()">&times;</button>
+            </div>
+            <form id="postItForm" onsubmit="savePostIt(event)">
+                <input type="hidden" id="postItId">
+
+                <div class="form-grid">
+                    <!-- Campo 1: URGENTE -->
+                    <div class="form-group full-width">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="urgente" onchange="toggleUrgentStyle()">
+                            <span class="checkbox-custom">⚠️ URGENTE</span>
+                        </label>
+                    </div>
+
+                    <!-- Campo 2: AZIENDA -->
+                    <div class="form-group">
+                        <label for="azienda">Azienda/Cliente *</label>
+                        <input type="text" id="azienda" required placeholder="es. CLIENTE BETA" list="aziendaList">
+                        <datalist id="aziendaList"></datalist>
+                    </div>
+
+                    <!-- Campo 3: LUOGO -->
+                    <div class="form-group">
+                        <label for="luogo">Luogo Destinazione *</label>
+                        <input type="text" id="luogo" required placeholder="es. Milano, zona centro" list="luogoList">
+                        <datalist id="luogoList"></datalist>
+                    </div>
+
+                    <!-- Campo 4: DATA -->
+                    <div class="form-group">
+                        <label for="data">Data Richiesta *</label>
+                        <input type="date" id="data" required>
+                    </div>
+
+                    <!-- Campo 5: ORARIO -->
+                    <div class="form-group">
+                        <label for="orario">Orario Richiesto *</label>
+                        <input type="time" id="orario" required>
+                    </div>
+
+                    <!-- Campo 6: CIRCUITO -->
+                    <div class="form-group">
+                        <label for="circuito">Circuito Geografico *</label>
+                        <select id="circuito" required>
+                            <option value="">Seleziona circuito</option>
+                            <option value="nord-est">🗺️ Nord-Est</option>
+                            <option value="nord-ovest">🗺️ Nord-Ovest</option>
+                            <option value="sud">🗺️ Sud</option>
+                            <option value="corriere">📦 Corriere Esterno</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo 7: MERCE -->
+                    <div class="form-group full-width">
+                        <label for="merce">Descrizione Merce *</label>
+                        <textarea id="merce" required placeholder="es. Capi abbigliamento lusso, collezione primavera" rows="2"></textarea>
+                    </div>
+
+                    <!-- Campo 8: PESO/VOLUME -->
+                    <div class="form-group">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" placeholder="es. 15" min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="volume">Numero Pacchi</label>
+                        <input type="number" id="volume" placeholder="es. 3" min="0" step="1">
+                    </div>
+
+                    <!-- Campo 9: MOTIVO -->
+                    <div class="form-group full-width">
+                        <label>Motivo Viaggio *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="ritiro" required>
+                                <span>📥 Ritiro</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="consegna" required>
+                                <span>📤 Consegna</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="motivo" value="entrambi" required>
+                                <span>🔄 Ritiro + Consegna</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Note aggiuntive -->
+                    <div class="form-group full-width">
+                        <label for="note">Note Aggiuntive (opzionale)</label>
+                        <textarea id="note" placeholder="es. Consegnare al piano -1, suonare citofono..." rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePostItForm()">Annulla</button>
+                    <button type="submit" class="btn btn-primary">💾 Salva Post-it</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts - IMPORTANTE: type="module" per supportare import ES6 -->
+    <script type="module" src="app-supabase.js"></script>
+</body>
+</html>
