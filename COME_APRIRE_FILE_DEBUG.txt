@@ -1,0 +1,207 @@
+================================================================================
+  COME APRIRE IL FILE DEBUG CORRETTAMENTE
+  (Risolve: CORS Error / ERR_FAILED)
+================================================================================
+
+❌ PROBLEMA:
+Hai aperto il file con doppio click e vedi questo errore:
+"Cross origin requests are only supported for protocol schemes: http, https"
+
+✅ SOLUZIONE:
+Devi usare un SERVER HTTP locale invece di aprire direttamente il file.
+
+================================================================================
+METODO 1: VS CODE LIVE SERVER (PIÙ FACILE - CONSIGLIATO)
+================================================================================
+
+PASSO 1: Apri VS Code
+  - Se non ce l'hai, scarica da: https://code.visualstudio.com/
+
+PASSO 2: Apri la cartella
+  - In VS Code: File > Apri Cartella (Open Folder)
+  - Seleziona la cartella:
+    C:\Users\michelangelo.zanardo\Documents\RBS\Progetti RBS\Trasporti\App_SupaBase
+
+PASSO 3: Installa estensione "Live Server" (SOLO LA PRIMA VOLTA)
+  - Click sull'icona Extensions (quadratini a sinistra, oppure Ctrl+Shift+X)
+  - Scrivi nella ricerca: "Live Server"
+  - Trova "Live Server" di Ritwick Dey
+  - Click "Install"
+  - Attendi completamento installazione
+
+PASSO 4: Avvia Live Server
+  - Nel pannello laterale di VS Code, trova il file: login-supabase-DEBUG.html
+  - Click DESTRO sul file
+  - Seleziona: "Open with Live Server"
+
+  OPPURE:
+  - Apri il file login-supabase-DEBUG.html in VS Code
+  - In basso a destra, click sul pulsante "Go Live"
+
+PASSO 5: Il browser si apre automaticamente!
+  - URL sarà: http://127.0.0.1:5500/login-supabase-DEBUG.html
+  - Nota: inizia con "http://" NON "file://"
+
+PASSO 6: Prova il login
+  - Email: admin@rbslogistica.local
+  - Password: admin123
+  - Guarda il LOG NERO in fondo alla pagina
+
+================================================================================
+METODO 2: PYTHON (se hai Python installato)
+================================================================================
+
+PASSO 1: Apri Prompt dei Comandi (cmd)
+  - Premi Win+R
+  - Scrivi: cmd
+  - Premi Invio
+
+PASSO 2: Vai nella cartella
+  - Copia e incolla questo comando:
+
+    cd "C:\Users\michelangelo.zanardo\Documents\RBS\Progetti RBS\Trasporti\App_SupaBase"
+
+  - Premi Invio
+
+PASSO 3: Verifica di avere Python
+  - Scrivi: python --version
+  - Premi Invio
+  - Se vedi un numero di versione (es: Python 3.11.0), continua
+  - Se vedi errore, usa METODO 1 o METODO 3
+
+PASSO 4: Avvia server
+  - Scrivi: python -m http.server 8000
+  - Premi Invio
+  - Vedrai: "Serving HTTP on :: port 8000..."
+
+PASSO 5: Apri browser
+  - Apri Chrome/Firefox/Edge
+  - Nella barra indirizzo scrivi: http://localhost:8000/login-supabase-DEBUG.html
+  - Premi Invio
+
+PASSO 6: Prova il login
+  - Email: admin@rbslogistica.local
+  - Password: admin123
+  - Guarda il LOG NERO in fondo alla pagina
+
+IMPORTANTE: Per fermare il server, torna al Prompt dei Comandi e premi Ctrl+C
+
+================================================================================
+METODO 3: NODE.JS HTTP-SERVER (se hai Node.js installato)
+================================================================================
+
+PASSO 1: Verifica Node.js
+  - Apri Prompt dei Comandi (cmd)
+  - Scrivi: node --version
+  - Se vedi un numero di versione, continua
+  - Se vedi errore, usa METODO 1 o METODO 2
+
+PASSO 2: Installa http-server (SOLO LA PRIMA VOLTA)
+  - Scrivi: npm install -g http-server
+  - Premi Invio
+  - Attendi installazione
+
+PASSO 3: Vai nella cartella
+  - Scrivi:
+
+    cd "C:\Users\michelangelo.zanardo\Documents\RBS\Progetti RBS\Trasporti\App_SupaBase"
+
+  - Premi Invio
+
+PASSO 4: Avvia server
+  - Scrivi: http-server
+  - Premi Invio
+  - Vedrai: "Starting up http-server..."
+
+PASSO 5: Apri browser
+  - Apri Chrome/Firefox/Edge
+  - Nella barra indirizzo scrivi: http://localhost:8080/login-supabase-DEBUG.html
+  - Premi Invio
+
+PASSO 6: Prova il login
+  - Email: admin@rbslogistica.local
+  - Password: admin123
+  - Guarda il LOG NERO in fondo alla pagina
+
+================================================================================
+COME CAPIRE SE FUNZIONA
+================================================================================
+
+✅ FUNZIONA se:
+  - L'URL nella barra del browser inizia con: http://localhost... o http://127.0.0.1...
+  - Il LOG NERO in fondo alla pagina mostra messaggi in verde/cyan/rosso
+  - Vedi i messaggi: "📦 Importando Supabase client..." nel log
+
+❌ NON FUNZIONA se:
+  - L'URL nella barra del browser inizia con: file:///C:/...
+  - Vedi errori CORS nella console (F12)
+  - Il LOG NERO è vuoto o non si carica
+
+================================================================================
+DOPO AVER APERTO CORRETTAMENTE CON HTTP
+================================================================================
+
+Una volta che il file è aperto con http:// invece di file://:
+
+1. Il LOG NERO ti mostrerà gli altri eventuali problemi
+2. Probabilmente vedrai uno di questi errori:
+
+   a) "❌ ERRORE: supabase-config.js non configurato"
+      → Soluzione: Modifica supabase-config.js con le tue credenziali Supabase
+
+   b) "❌ ERRORE Supabase Auth: Invalid login credentials"
+      → Soluzione: Crea utente in Supabase Authentication
+
+   c) "❌ ERRORE recupero profilo: row not found"
+      → Soluzione: Inserisci profilo in user_profiles con query SQL
+
+3. Segui le istruzioni nel LOG (sono molto dettagliate)
+
+4. Oppure leggi: DIAGNOSI_LOGIN_RAPIDA.md per le soluzioni
+
+================================================================================
+DOMANDE FREQUENTI
+================================================================================
+
+Q: Perché non posso aprire direttamente il file?
+A: I browser moderni bloccano JavaScript da file:// per sicurezza.
+   Supabase usa JavaScript per connettersi al cloud, quindi serve http://.
+
+Q: Devo installare un server vero?
+A: No! Questi sono server di sviluppo locali che girano solo sul tuo PC.
+   Nessuno dall'esterno può accedere.
+
+Q: Quale metodo scegliere?
+A: Se hai VS Code o puoi installarlo: METODO 1 (più facile)
+   Se hai Python: METODO 2 (veloce)
+   Se hai Node.js: METODO 3 (funziona bene)
+
+Q: Il server rimane sempre acceso?
+A: No, si spegne quando chiudi il Prompt dei Comandi (metodi 2-3)
+   o quando clicchi "Stop" in VS Code (metodo 1).
+   Devi riavviarlo ogni volta che usi l'app.
+
+Q: Posso usare l'app da smartphone dopo?
+A: Sì, ma solo dopo aver risolto tutti i problemi di configurazione.
+   Per l'accesso remoto serve pubblicare su Playcode o altro hosting.
+   Per ora, concentrati sul far funzionare il login sul PC.
+
+================================================================================
+RIEPILOGO RAPIDO
+================================================================================
+
+1. NON aprire il file con doppio click
+2. USA uno dei 3 metodi sopra (consigliato: VS Code Live Server)
+3. VERIFICA che l'URL inizi con http://
+4. PROVA il login
+5. LEGGI il LOG NERO per identificare altri problemi
+6. APPLICA la soluzione mostrata nel log
+
+================================================================================
+
+Buon lavoro! 🚀
+
+Prossimo step: Dopo aver aperto con http://, il LOG DEBUG ti dirà
+esattamente cosa configurare (credenziali, utente, profilo).
+
+================================================================================
