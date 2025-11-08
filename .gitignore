@@ -1,0 +1,4 @@
+# Ignore files in Windows user directories (outside repository)
+# These files are copies in a separate location and should not be tracked
+C:*
+/mnt/c/*
