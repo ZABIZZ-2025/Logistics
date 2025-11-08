@@ -21,14 +21,24 @@ let realtimeChannel = null;
 // ==========================================
 
 async function checkSession() {
+    console.log('🔍 Controllo sessione...');
+
     // Get current Supabase session
     const { data: { session }, error } = await supabase.auth.getSession();
 
-    if (error || !session) {
-        // No session, redirect to login
+    if (error) {
+        console.error('❌ Errore recupero sessione:', error);
         window.location.href = 'login-supabase.html';
         return null;
     }
+
+    if (!session) {
+        console.log('⚠️ Nessuna sessione attiva, redirect a login');
+        window.location.href = 'login-supabase.html';
+        return null;
+    }
+
+    console.log('✅ Sessione trovata per utente:', session.user.email);
 
     // Get user profile from database
     const { data: profile, error: profileError } = await supabase
@@ -37,12 +47,31 @@ async function checkSession() {
         .eq('id', session.user.id)
         .single();
 
-    if (profileError || !profile) {
-        console.error('Errore caricamento profilo:', profileError);
+    if (profileError) {
+        console.error('❌ Errore caricamento profilo:', profileError);
+
+        // Show error message to user
+        alert(`⚠️ ERRORE PROFILO UTENTE\n\nIl tuo account esiste ma il profilo non è stato configurato.\n\nDettagli: ${profileError.message}\n\nContatta l'amministratore per configurare il profilo.`);
+
+        // Sign out and redirect
         await supabase.auth.signOut();
         window.location.href = 'login-supabase.html';
         return null;
     }
+
+    if (!profile) {
+        console.error('❌ Profilo non trovato per l\'utente:', session.user.email);
+
+        // Show error message to user
+        alert(`⚠️ PROFILO NON TROVATO\n\nIl tuo account (${session.user.email}) esiste in Supabase ma il profilo non è stato inserito nella tabella user_profiles.\n\nContatta l'amministratore per inserire il profilo.`);
+
+        // Sign out and redirect
+        await supabase.auth.signOut();
+        window.location.href = 'login-supabase.html';
+        return null;
+    }
+
+    console.log('✅ Profilo caricato:', profile.username, '(Ruolo:', profile.role + ')');
 
     currentSession = {
         userId: profile.id,

@@ -180,13 +180,7 @@
             <button type="submit" class="login-btn" id="loginBtn">🔐 Accedi</button>
         </form>
 
-        <div class="login-info">
-            <strong>ℹ️ Utenti di Default:</strong>
-            <div class="user-list">
-                <strong>Admin:</strong> admin@rbslogistica.local / admin123<br>
-                <strong>Utente:</strong> user@rbslogistica.local / user123
-            </div>
-        </div>
+        <!-- Credenziali rimosse per sicurezza -->
     </div>
 
     <script type="module">
@@ -253,18 +247,20 @@
                 }, 500);
 
             } catch (error) {
-                console.error('Errore login:', error);
+                console.error('❌ Errore login:', error);
 
-                let errorMessage = 'Email o password non corretti';
+                let errorMessage = '❌ Email o password non corretti';
 
                 if (error.message.includes('Invalid login credentials')) {
-                    errorMessage = 'Email o password non corretti';
+                    errorMessage = '❌ Email o password non corretti. Verifica le credenziali.';
                 } else if (error.message.includes('Email not confirmed')) {
-                    errorMessage = 'Email non confermata. Controlla la tua casella email.';
+                    errorMessage = '⚠️ Email non confermata. Contatta l\'amministratore.';
                 } else if (error.message.includes('Profilo utente non trovato')) {
-                    errorMessage = error.message;
+                    errorMessage = '⚠️ ' + error.message;
+                } else if (error.message.includes('fetch') || error.message.includes('network')) {
+                    errorMessage = '🌐 Errore di connessione. Verifica la configurazione Supabase.';
                 } else {
-                    errorMessage = `Errore: ${error.message}`;
+                    errorMessage = `❌ Errore: ${error.message}`;
                 }
 
                 showError(errorMessage);
