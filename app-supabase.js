@@ -28,13 +28,13 @@ async function checkSession() {
 
     if (error) {
         console.error('❌ Errore recupero sessione:', error);
-        window.location.href = 'login-supabase.html';
+        window.location.href = 'index.html';
         return null;
     }
 
     if (!session) {
         console.log('⚠️ Nessuna sessione attiva, redirect a login');
-        window.location.href = 'login-supabase.html';
+        window.location.href = 'index.html';
         return null;
     }
 
@@ -55,7 +55,7 @@ async function checkSession() {
 
         // Sign out and redirect
         await supabase.auth.signOut();
-        window.location.href = 'login-supabase.html';
+        window.location.href = 'index.html';
         return null;
     }
 
@@ -67,7 +67,7 @@ async function checkSession() {
 
         // Sign out and redirect
         await supabase.auth.signOut();
-        window.location.href = 'login-supabase.html';
+        window.location.href = 'index.html';
         return null;
     }
 
@@ -86,7 +86,7 @@ async function checkSession() {
 async function logout() {
     if (confirm('Vuoi uscire dall\'applicazione?')) {
         await supabase.auth.signOut();
-        window.location.href = 'login-supabase.html';
+        window.location.href = 'index.html';
     }
 }
 

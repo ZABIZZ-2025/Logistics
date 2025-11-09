@@ -1,275 +1,219 @@
-# RBS Logistica Smart 🚚
+# 🚚 RBS Logistica Smart - Supabase Edition
 
-Sistema di gestione viaggi e logistica per RBS 1979 - Applicazione web completa senza database esterni.
+Sistema completo di gestione viaggi e logistica per RBS 1979.
 
-## 📋 Moduli Implementati
+## 🎯 Caratteristiche
 
-### ✅ Modulo 1: Crea Post-it Virtuale
-- Form completo per creare nuovi viaggi
-- 7 campi essenziali:
-  1. Urgente (Sì/No)
-  2. Azienda/Cliente
-  3. Luogo di destinazione
-  4. Orario richiesto
-  5. Descrizione merce
-  6. Dimensioni/Quantità (peso/volume)
-  7. Motivo del viaggio (Ritiro/Consegna/Entrambi)
-- Autocomplete per aziende e luoghi già utilizzati
-- Salvataggio automatico nel browser (LocalStorage)
+- ✅ **Autenticazione sicura** con Supabase Auth
+- ✅ **Database real-time** con Supabase PostgreSQL
+- ✅ **Sincronizzazione multi-utente** in tempo reale
+- ✅ **Kanban board interattivo** con drag & drop
+- ✅ **Gestione anagrafica clienti**
+- ✅ **Export Google Maps** per pianificazione percorsi
+- ✅ **Responsive design** (Desktop, Tablet, Mobile)
+- ✅ **PWA ready** (installabile come app)
 
-### ✅ Modulo 2: Kanban Virtuale Interattivo
-- 6 colonne operative:
-  - **PIANIFICATO**: Viaggi programmati
-  - **IN CORSO**: Viaggi in esecuzione
-  - **CORRIERE ESTERNO**: Affidati a corrieri
-  - **URGENZE**: Richieste prioritarie
-  - **RIMANDA DOMANI**: Non urgenti
-  - **COMPLETATO**: Viaggi conclusi
-- **Drag & Drop**: Sposta i post-it tra colonne trascinandoli
-- 4 circuiti geografici: Nord-Est, Nord-Ovest, Sud, Corriere
-- Visualizzazione colorata per urgenze e corrieri
-- Contatori automatici per ogni colonna
+## 📋 Requisiti
 
-## 🚀 Come Utilizzare l'App
+- Account Supabase (gratuito): https://supabase.com
+- Browser moderno (Chrome, Firefox, Safari, Edge)
 
-### Avvio Immediato
+## 🚀 Deploy su Netlify (5 minuti)
 
-1. **Apri il file `index.html` nel browser**
-   ```bash
-   # Opzione 1: Doppio click su index.html
-   # Opzione 2: Apri da terminale
-   open index.html        # Mac
-   xdg-open index.html    # Linux
-   start index.html       # Windows
-   ```
+### 1. Configura Supabase
 
-2. **Oppure usa un server locale (consigliato)**
-   ```bash
-   # Con Python 3
-   python3 -m http.server 8000
+1. Crea account su https://app.supabase.com
+2. Crea nuovo progetto "RBS Logistica"
+3. Vai su SQL Editor e esegui `supabase-schema.sql`
+4. Vai su Settings > API e copia:
+   - Project URL
+   - anon public key
 
-   # Con Node.js
-   npx http-server -p 8000
+### 2. Configura l'App
 
-   # Con PHP
-   php -S localhost:8000
-   ```
-
-3. **Apri il browser**: http://localhost:8000
-
-### Primo Utilizzo
-
-L'app è precaricata con **3 viaggi di esempio** per testare immediatamente le funzionalità.
-
-### Funzionalità Principali
-
-#### 1️⃣ Creare un Nuovo Viaggio
-
-1. Clicca su **"➕ Nuovo Viaggio"** in alto a destra
-2. Compila il form con i 7 campi
-3. Spunta **"URGENTE"** se necessario
-4. Clicca su **"💾 Salva Post-it"**
-5. Il post-it apparirà nella colonna appropriata
-
-#### 2️⃣ Spostare un Viaggio
-
-- **Trascina** il post-it da una colonna all'altra
-- Il sistema salva automaticamente la nuova posizione
-- Riceverai una notifica di conferma
-
-#### 3️⃣ Modificare un Viaggio
-
-1. Clicca sull'icona **✏️** sul post-it
-2. Modifica i campi nel form
-3. Clicca **"💾 Salva Post-it"**
-
-#### 4️⃣ Eliminare un Viaggio
-
-1. Clicca sull'icona **🗑️** sul post-it
-2. Conferma l'eliminazione
-
-#### 5️⃣ Filtrare i Viaggi
-
-Nella sidebar sinistra:
-- **Cerca**: Filtra per cliente, luogo o merce
-- **Circuito**: Mostra solo viaggi di un circuito specifico
-- **Solo Urgenti**: Mostra solo viaggi urgenti
-
-#### 6️⃣ Esportare/Importare Dati
-
-- **Esporta**: Scarica tutti i viaggi in formato JSON
-- **Importa**: Carica un file JSON precedentemente esportato
-
-## 📊 Statistiche
-
-La sidebar mostra in tempo reale:
-- Viaggi totali
-- Pianificati
-- In corso
-- Completati
-- Urgenze
-
-## 🎨 Caratteristiche Tecniche
-
-### Tecnologie Utilizzate
-
-- **HTML5**: Struttura moderna e semantica
-- **CSS3**: Design responsive con gradients e animazioni
-- **JavaScript Vanilla**: Nessuna dipendenza esterna
-- **LocalStorage**: Persistenza dati nel browser
-- **Drag & Drop API**: Interazione intuitiva
-- **Progressive Web App (PWA)**: Installabile come app
-
-### Storage Dati
-
-- **LocalStorage**: Tutti i dati sono salvati nel browser
-- **Nessun database esterno** richiesto
-- **Backup automatico** tramite export JSON
-- **Capacità**: ~5-10MB (migliaia di viaggi)
-
-### Compatibilità
-
-✅ Chrome 90+
-✅ Firefox 88+
-✅ Safari 14+
-✅ Edge 90+
-✅ Mobile browsers (iOS Safari, Chrome Mobile)
-
-### Responsive Design
-
-- 📱 **Mobile**: Layout a colonna singola
-- 📱 **Tablet**: Layout a 2 colonne
-- 💻 **Desktop**: Layout completo a 6 colonne
-
-## 🔧 Personalizzazione
-
-### Aggiungere il Logo RBS 1979
-
-1. Salva il logo come `logo.png` nella cartella principale
-2. Dimensioni consigliate: 200x50px (PNG trasparente)
-3. Ricarica la pagina
-
-### Modificare i Circuiti
-
-Modifica il file `app.js` alla riga con i circuiti:
+Modifica `supabase-config.js`:
 
 ```javascript
-const circuitoIcon = {
-    'nord-est': '🗺️ Nord-Est',
-    'nord-ovest': '🗺️ Nord-Ovest',
-    'sud': '🗺️ Sud',
-    'corriere': '📦 Corriere',
-    'tuo-circuito': '🗺️ Tuo Circuito' // Aggiungi qui
+const SUPABASE_CONFIG = {
+    url: 'IL_TUO_PROJECT_URL',
+    anonKey: 'LA_TUA_ANON_KEY'
 };
 ```
 
-E nel form HTML (`index.html`):
+### 3. Crea Utente Admin
 
-```html
-<option value="tuo-circuito">🗺️ Tuo Circuito</option>
+1. Vai su Authentication > Users
+2. Click "Add user" > "Create new user"
+3. Email: `admin@rbslogistica.local`
+4. Password: (scegli una password sicura)
+5. ✅ Spunta "Auto Confirm User"
+6. Copia l'UUID dell'utente creato
+7. Vai su SQL Editor ed esegui:
+
+```sql
+INSERT INTO user_profiles (id, user_id, username, role)
+VALUES (
+    'UUID_DELL_UTENTE',  -- Sostituisci con UUID copiato
+    'admin',
+    'Amministratore',
+    'admin'
+);
 ```
 
-### Cambiare i Colori
+### 4. Deploy su Netlify
 
-Modifica le variabili CSS in `styles.css`:
+**Opzione A: Netlify Drop (più veloce)**
+1. Vai su https://app.netlify.com/drop
+2. Trascina l'intera cartella del progetto
+3. Attendi 30 secondi
+4. **FATTO!** L'app è online
 
-```css
-:root {
-    --primary-color: #ff6b35;  /* Arancione RBS */
-    --secondary-color: #004e89;
-    /* ... altri colori ... */
-}
+**Opzione B: Git Deploy (consigliato per produzione)**
+1. Pusha il repository su GitHub
+2. Vai su https://app.netlify.com
+3. Click "Add new site" > "Import from Git"
+4. Seleziona il repository
+5. Deploy automatico ad ogni push
+
+## 📁 Struttura File
+
+```
+/
+├── index.html              # Pagina login (entry point)
+├── dashboard.html          # Dashboard Kanban
+├── app-supabase.js         # Logica applicazione
+├── supabase-config.js      # Configurazione Supabase
+├── supabase-schema.sql     # Schema database
+├── styles.css              # Stili CSS
+├── logo.svg                # Logo RBS
+├── manifest.json           # PWA manifest
+├── docs/                   # Documentazione completa
+└── README.md               # Questo file
 ```
 
-## 🔐 Sicurezza e Privacy
-
-- ✅ Tutti i dati rimangono **nel browser locale**
-- ✅ Nessun invio dati a server esterni
-- ✅ Nessun tracking o analytics
-- ✅ Funziona completamente **offline**
-- ⚠️ Backup regolare tramite export consigliato
-
-## 📱 Installare come App
-
-### Desktop (Chrome/Edge)
+## 🔐 Primo Accesso
 
 1. Apri l'app nel browser
-2. Clicca sull'icona **"Installa"** nella barra degli indirizzi
-3. Conferma l'installazione
+2. Email: `admin@rbslogistica.local`
+3. Password: (quella scelta in Supabase)
+4. Accedi e inizia a usare l'app!
 
-### Mobile (iOS/Android)
+## 📱 Funzionalità Principali
 
-1. Apri l'app in Safari (iOS) o Chrome (Android)
-2. Tocca **"Condividi"** (iOS) o **"Menu"** (Android)
-3. Seleziona **"Aggiungi a Home"**
+### Per Utenti Normali
+- ✅ Creare nuove richieste di viaggio
+- ✅ Visualizzare i propri viaggi
+- ✅ Modificare richieste in stato "Richieste"
+- ✅ Visualizzare storico delle modifiche
 
-## 🔄 Backup e Ripristino
+### Per Amministratori
+- ✅ Tutte le funzionalità utente +
+- ✅ Gestire TUTTI i viaggi (drag & drop tra colonne)
+- ✅ Modificare qualsiasi viaggio
+- ✅ Eliminare viaggi
+- ✅ Gestire anagrafica clienti
+- ✅ Esportare dati
+- ✅ Export Google Maps per percorsi
 
-### Backup Manuale
+## 🎨 Colonne Kanban
 
-1. Clicca su **"📥 Esporta Dati"**
-2. Salva il file JSON in un luogo sicuro
-3. Ripeti regolarmente (es. ogni settimana)
+1. **Richieste** - Nuove richieste da processare
+2. **Pianificato** - Viaggi pianificati
+3. **In Corso** - Viaggi in esecuzione
+4. **Preventivi** - Richieste di preventivo
+5. **Corriere Esterno** - Affidati a corrieri terzi
+6. **Completato** - Viaggi conclusi
 
-### Ripristino
+## 🔄 Sincronizzazione Real-time
 
-1. Clicca su **"📤 Importa Dati"**
-2. Seleziona il file JSON salvato
-3. Conferma la sostituzione dei dati attuali
+L'app usa Supabase Realtime per sincronizzare automaticamente:
+- Nuovi viaggi creati
+- Modifiche ai viaggi esistenti
+- Spostamenti tra colonne
+- Eliminazioni
 
-### Backup Automatico
+Apri l'app in 2 finestre: le modifiche si vedono ISTANTANEAMENTE!
 
-I dati sono salvati automaticamente nel browser, ma:
-- ⚠️ Possono essere persi se cancelli la cache del browser
-- ⚠️ Non sono condivisi tra dispositivi diversi
-- ✅ Usa l'export per backup sicuri
+## 📊 Database
 
-## ⌨️ Scorciatoie da Tastiera
+### Tabelle
+- `user_profiles` - Profili utenti (ruoli e permessi)
+- `anagrafica` - Clienti/fornitori
+- `viaggi` - Viaggi/spedizioni
+- `history` - Storico modifiche
 
-- **Ctrl/Cmd + N**: Crea nuovo viaggio
-- **ESC**: Chiudi modal/form
-- **Tab**: Naviga tra i campi del form
+### Sicurezza (RLS)
+- ✅ Row Level Security abilitato
+- ✅ Utenti vedono solo i propri dati
+- ✅ Admin ha accesso completo
+- ✅ Politiche di sicurezza automatiche
 
-## 🐛 Risoluzione Problemi
+## 🛠️ Sviluppo Locale
 
-### I dati non si salvano
+```bash
+# 1. Clona il repository
+git clone <repository-url>
+cd Logistics
 
-- Verifica che il browser non sia in modalità incognito
-- Controlla che i cookie/storage siano abilitati
-- Fai un export per backup
+# 2. Configura Supabase (modifica supabase-config.js)
 
-### Il drag & drop non funziona
+# 3. Avvia server locale
+python3 -m http.server 8000
+# oppure
+npx http-server -p 8000
 
-- Aggiorna il browser all'ultima versione
-- Prova con Chrome o Firefox
-- Disabilita estensioni che potrebbero interferire
+# 4. Apri browser
+open http://localhost:8000
+```
 
-### L'app è lenta
+## 📖 Documentazione Completa
 
-- Esporta i dati
-- Cancella i viaggi completati vecchi
-- Reimporta i dati aggiornati
+Tutte le guide sono nella cartella `docs/`:
 
-## 📞 Supporto
+- `DEPLOY_RAPIDO_NETLIFY.txt` - Guida deploy dettagliata
+- `SUPABASE_SETUP_GUIDE.md` - Setup Supabase completo
+- `TROUBLESHOOTING_LOGIN.md` - Risoluzione problemi
+- E molte altre...
 
-Per problemi o domande:
-- Controlla questa documentazione
-- Verifica la console del browser (F12)
-- Esporta i dati prima di modifiche importanti
+## 🆘 Troubleshooting
 
-## 🎯 Roadmap Futuri Moduli
+### Login loop (torna sempre al login)
+- **Causa**: Profilo non inserito in `user_profiles`
+- **Soluzione**: Verifica di aver eseguito la query INSERT con l'UUID corretto
 
-- **Modulo 3**: Vista Mobile Driver (percorsi e navigazione)
-- **Modulo 4**: Checklist Magazzino
-- **Modulo 5**: Dashboard Analytics
-- **Modulo 6**: Report e Statistiche Avanzate
+### Errore "Invalid login credentials"
+- **Causa**: Email o password errate
+- **Soluzione**: Verifica credenziali in Supabase > Authentication > Users
 
-## 📄 Licenza
+### Errore CORS
+- **Causa**: File `supabase-config.js` non modificato
+- **Soluzione**: Inserisci URL e key reali (non `YOUR_SUPABASE_...`)
+
+### Più dettagli
+Consulta `docs/TROUBLESHOOTING_LOGIN.md` per diagnostica completa
+
+## 🔒 Sicurezza
+
+- ✅ HTTPS obbligatorio (fornito da Netlify)
+- ✅ Autenticazione JWT con Supabase
+- ✅ Row Level Security su database
+- ✅ API keys protette (anon key è pubblica per design)
+- ✅ Nessun dato sensibile in frontend
+
+## 📝 Licenza
 
 © 2025 RBS 1979 - Uso interno aziendale
 
+## 🤝 Supporto
+
+Per problemi o domande:
+1. Consulta la documentazione in `docs/`
+2. Verifica Console browser (F12) per errori
+3. Controlla configurazione Supabase
+
 ---
 
-**Versione**: 1.0.0
-**Data**: Ottobre 2025
-**Sviluppato per**: RBS 1979 Logistica
+**Versione**: 2.0.0
+**Ultimo aggiornamento**: Novembre 2025
+**Database**: Supabase PostgreSQL
+**Deploy**: Netlify
