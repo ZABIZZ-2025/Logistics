@@ -1,15 +1,6 @@
 # Netlify Configuration
 [build]
   publish = "."
-  command = "echo 'No build required - static site'"
-
-# Redirect rules for SPA behavior
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin", "user"]}
-  force = false
 
 # Headers for security and performance
 [[headers]]
@@ -40,9 +31,3 @@
   for = "*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-
-# Custom 404 page (optional)
-[[redirects]]
-  from = "/404"
-  to = "/index.html"
-  status = 404
