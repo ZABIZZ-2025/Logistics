@@ -11,10 +11,10 @@
 
 const SUPABASE_CONFIG = {
     // SOSTITUISCI CON IL TUO PROJECT URL (esempio: https://xyzabcd.supabase.co)
-    url: 'YOUR_SUPABASE_URL',
+    url: 'https://lsknnjcgtpxykfrwlwcp.supabase.co',
 
     // SOSTITUISCI CON LA TUA ANON KEY (esempio: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)
-    anonKey: 'YOUR_SUPABASE_ANON_KEY'
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza25uamNndHB4eWtmcndsd2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MjgyNTIsImV4cCI6MjA3ODIwNDI1Mn0._BHsH-2saNGgRTcMABSiw68TOVpnEE7y43zM7jpXfls'
 };
 
 // Import Supabase client library
