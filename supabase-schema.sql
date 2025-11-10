@@ -50,6 +50,11 @@ CREATE TABLE IF NOT EXISTS viaggi (
     luogo TEXT NOT NULL,
     data DATE NOT NULL,
     orario TIME NOT NULL,
+    circuito TEXT CHECK (circuito IN ('nord-est', 'nord-ovest', 'sud', 'corriere')),
+    merce TEXT,
+    peso DECIMAL(10,2) DEFAULT 0,
+    volume INTEGER DEFAULT 0,
+    motivo TEXT CHECK (motivo IN ('ritiro', 'consegna', 'entrambi')),
     note TEXT,
 
     -- Posizione Kanban
