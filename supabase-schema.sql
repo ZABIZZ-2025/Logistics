@@ -299,10 +299,16 @@ CREATE TRIGGER update_viaggi_updated_at
 
 -- ============================================
 -- FUNZIONE: Registra automaticamente nello storico
+-- Con SECURITY DEFINER per bypassare RLS
 -- ============================================
 CREATE OR REPLACE FUNCTION log_viaggio_changes()
 RETURNS TRIGGER AS $$
+DECLARE
+    current_user_id UUID;
 BEGIN
+    -- Ottieni l'ID utente corrente (potrebbe essere NULL in alcuni contesti)
+    current_user_id := auth.uid();
+
     IF (TG_OP = 'INSERT') THEN
         INSERT INTO history (viaggio_id, action, to_column, user_id, username)
         VALUES (NEW.id, 'created', NEW."column", NEW.created_by, NEW.created_by_username);
@@ -311,7 +317,7 @@ BEGIN
         -- Registra se cambia colonna
         IF (OLD."column" IS DISTINCT FROM NEW."column") THEN
             INSERT INTO history (viaggio_id, action, from_column, to_column, user_id)
-            VALUES (NEW.id, 'moved', OLD."column", NEW."column", auth.uid());
+            VALUES (NEW.id, 'moved', OLD."column", NEW."column", current_user_id);
         END IF;
         -- Registra se viene approvato
         IF (OLD.status = 'pending' AND NEW.status = 'approved') THEN
@@ -321,21 +327,29 @@ BEGIN
         -- Registra se viene completato
         IF (OLD.status != 'completed' AND NEW.status = 'completed') THEN
             INSERT INTO history (viaggio_id, action, user_id)
-            VALUES (NEW.id, 'completed', auth.uid());
+            VALUES (NEW.id, 'completed', current_user_id);
         END IF;
         RETURN NEW;
     ELSIF (TG_OP = 'DELETE') THEN
+        -- Per DELETE, usa OLD invece di NEW
+        -- Il trigger viene eseguito BEFORE DELETE, quindi il record esiste ancora
         INSERT INTO history (viaggio_id, action, user_id)
-        VALUES (OLD.id, 'deleted', auth.uid());
+        VALUES (OLD.id, 'deleted', current_user_id);
         RETURN OLD;
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger per logging automatico
+-- Trigger per logging DELETE (BEFORE per permettere l'inserimento in history)
+CREATE TRIGGER log_viaggi_delete
+    BEFORE DELETE ON viaggi
+    FOR EACH ROW
+    EXECUTE FUNCTION log_viaggio_changes();
+
+-- Trigger per logging INSERT e UPDATE (AFTER per avere i dati completi)
 CREATE TRIGGER log_viaggi_changes
-    AFTER INSERT OR UPDATE OR DELETE ON viaggi
+    AFTER INSERT OR UPDATE ON viaggi
     FOR EACH ROW
     EXECUTE FUNCTION log_viaggio_changes();
 
