@@ -25,7 +25,7 @@ ORDER BY tablename;
 -- ============================================
 -- 2. VERIFICA UTENTI IN AUTH.USERS
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '2. UTENTI IN AUTH.USERS' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -49,7 +49,7 @@ FROM auth.users;
 -- ============================================
 -- 3. VERIFICA PROFILI IN USER_PROFILES
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '3. PROFILI IN USER_PROFILES' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -73,7 +73,7 @@ FROM user_profiles;
 -- ============================================
 -- 4. VERIFICA CORRISPONDENZA AUTH <-> PROFILES
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '4. CORRISPONDENZA AUTH.USERS <-> USER_PROFILES' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -93,7 +93,7 @@ ORDER BY u.email;
 -- ============================================
 -- 5. VERIFICA RLS ABILITATO
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '5. ROW LEVEL SECURITY (RLS) ABILITATO' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -111,7 +111,7 @@ ORDER BY relname;
 -- ============================================
 -- 6. VERIFICA POLICY RLS
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '6. POLICY RLS SU USER_PROFILES' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -139,7 +139,7 @@ WHERE tablename = 'user_profiles';
 -- ============================================
 -- 7. VERIFICA POLICY RLS SU VIAGGI
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '7. POLICY RLS SU VIAGGI' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -163,7 +163,7 @@ WHERE tablename = 'viaggi';
 -- ============================================
 -- 8. VERIFICA TRIGGER
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '8. TRIGGER SU VIAGGI' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -192,7 +192,7 @@ WHERE event_object_table = 'viaggi';
 -- ============================================
 -- 9. VERIFICA CAMPI TABELLA VIAGGI
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '9. CAMPI TABELLA VIAGGI' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -233,7 +233,7 @@ WHERE table_name = 'viaggi';
 -- ============================================
 -- 10. CONTEGGIO DATI
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT '10. CONTEGGIO DATI NELLE TABELLE' AS "CHECK";
 SELECT '========================================' AS "INFO";
@@ -277,7 +277,7 @@ FROM anagrafica;
 -- ============================================
 -- RIEPILOGO FINALE
 -- ============================================
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT 'RIEPILOGO DIAGNOSTICA' AS "INFO";
 SELECT '========================================' AS "INFO";
@@ -316,7 +316,7 @@ SELECT
         ELSE '✅ TUTTO OK: Database configurato correttamente. Se il login non funziona, prova SOLUZIONE 4 (cache browser)'
     END AS "DIAGNOSI FINALE";
 
-SELECT '' AS "";
+SELECT '';
 SELECT '========================================' AS "INFO";
 SELECT 'Leggi FIX-LOGIN-LOOP-AFTER-DB-RESTART.md per le soluzioni dettagliate' AS "INFO";
 SELECT '========================================' AS "INFO";
