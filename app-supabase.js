@@ -5,6 +5,13 @@
 // Import Supabase client
 import { supabase } from './supabase-config.js';
 
+// Verifica che Supabase sia inizializzato
+if (!supabase) {
+    console.error('❌ Supabase client non inizializzato!');
+    alert('Errore di configurazione. Ricarica la pagina o contatta l\'amministratore.');
+    window.location.href = 'index.html';
+}
+
 // Global State
 let viaggi = [];
 let currentSession = null;
@@ -23,64 +30,78 @@ let realtimeChannel = null;
 async function checkSession() {
     console.log('🔍 Controllo sessione...');
 
-    // Get current Supabase session
-    const { data: { session }, error } = await supabase.auth.getSession();
-
-    if (error) {
-        console.error('❌ Errore recupero sessione:', error);
+    // Verifica client Supabase
+    if (!supabase) {
+        console.error('❌ Client Supabase non disponibile');
         window.location.href = 'index.html';
         return null;
     }
 
-    if (!session) {
-        console.log('⚠️ Nessuna sessione attiva, redirect a login');
+    try {
+        // Get current Supabase session
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+            console.error('❌ Errore recupero sessione:', error);
+            window.location.href = 'index.html';
+            return null;
+        }
+
+        if (!session) {
+            console.log('⚠️ Nessuna sessione attiva, redirect a login');
+            window.location.href = 'index.html';
+            return null;
+        }
+
+        console.log('✅ Sessione trovata per utente:', session.user.email);
+
+        // Get user profile from database
+        const { data: profile, error: profileError } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        if (profileError) {
+            console.error('❌ Errore caricamento profilo:', profileError);
+
+            // Show error message to user
+            alert(`⚠️ ERRORE PROFILO UTENTE\n\nIl tuo account esiste ma il profilo non è stato configurato.\n\nDettagli: ${profileError.message}\n\nContatta l'amministratore per configurare il profilo.`);
+
+            // Sign out and redirect
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+            return null;
+        }
+
+        if (!profile) {
+            console.error('❌ Profilo non trovato per l\'utente:', session.user.email);
+
+            // Show error message to user
+            alert(`⚠️ PROFILO NON TROVATO\n\nIl tuo account (${session.user.email}) esiste in Supabase ma il profilo non è stato inserito nella tabella user_profiles.\n\nContatta l'amministratore per inserire il profilo.`);
+
+            // Sign out and redirect
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+            return null;
+        }
+
+        console.log('✅ Profilo caricato:', profile.username, '(Ruolo:', profile.role + ')');
+
+        currentSession = {
+            userId: profile.id,
+            username: profile.user_id,
+            role: profile.role,
+            name: profile.username
+        };
+
+        return currentSession;
+
+    } catch (err) {
+        console.error('❌ Errore imprevisto durante il controllo sessione:', err);
         window.location.href = 'index.html';
         return null;
     }
-
-    console.log('✅ Sessione trovata per utente:', session.user.email);
-
-    // Get user profile from database
-    const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-    if (profileError) {
-        console.error('❌ Errore caricamento profilo:', profileError);
-
-        // Show error message to user
-        alert(`⚠️ ERRORE PROFILO UTENTE\n\nIl tuo account esiste ma il profilo non è stato configurato.\n\nDettagli: ${profileError.message}\n\nContatta l'amministratore per configurare il profilo.`);
-
-        // Sign out and redirect
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
-        return null;
-    }
-
-    if (!profile) {
-        console.error('❌ Profilo non trovato per l\'utente:', session.user.email);
-
-        // Show error message to user
-        alert(`⚠️ PROFILO NON TROVATO\n\nIl tuo account (${session.user.email}) esiste in Supabase ma il profilo non è stato inserito nella tabella user_profiles.\n\nContatta l'amministratore per inserire il profilo.`);
-
-        // Sign out and redirect
-        await supabase.auth.signOut();
-        window.location.href = 'index.html';
-        return null;
-    }
-
-    console.log('✅ Profilo caricato:', profile.username, '(Ruolo:', profile.role + ')');
-
-    currentSession = {
-        userId: profile.id,
-        username: profile.user_id,
-        role: profile.role,
-        name: profile.username
-    };
-
-    return currentSession;
 }
 
 async function logout() {

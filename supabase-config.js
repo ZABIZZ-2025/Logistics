@@ -20,8 +20,20 @@ const SUPABASE_CONFIG = {
 // Import Supabase client library (esm.sh è più stabile per ESM)
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Create Supabase client
-const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+// Create Supabase client con gestione errori
+let supabase = null;
+try {
+    supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    });
+    console.log('✅ Supabase client inizializzato');
+} catch (error) {
+    console.error('❌ Errore inizializzazione Supabase:', error);
+}
 
 // Export for use in other modules
 export { supabase, SUPABASE_CONFIG };

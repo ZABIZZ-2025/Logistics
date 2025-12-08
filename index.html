@@ -186,13 +186,31 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
 
+        // Verifica che il client Supabase sia inizializzato
+        if (!supabase) {
+            document.getElementById('loginError').textContent = '❌ Errore di configurazione Supabase. Contatta l\'amministratore.';
+            document.getElementById('loginError').classList.add('show');
+            document.getElementById('loginBtn').disabled = true;
+        }
+
         // Check if already logged in
         async function checkExistingSession() {
-            const { data: { session }, error } = await supabase.auth.getSession();
+            if (!supabase) return;
 
-            if (session) {
-                // Already logged in, redirect to app
-                window.location.href = 'dashboard.html';
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    console.error('Errore verifica sessione:', error);
+                    return;
+                }
+
+                if (session) {
+                    // Already logged in, redirect to app
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (err) {
+                console.error('Errore connessione Supabase:', err);
             }
         }
 
@@ -204,6 +222,12 @@
             const loginBtn = document.getElementById('loginBtn');
             const errorDiv = document.getElementById('loginError');
             const successDiv = document.getElementById('loginSuccess');
+
+            // Verifica client Supabase
+            if (!supabase) {
+                showError('❌ Errore di configurazione. Ricarica la pagina.');
+                return;
+            }
 
             // Disable button
             loginBtn.disabled = true;
