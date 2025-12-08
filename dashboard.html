@@ -8,6 +8,183 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff6b35">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Stili per segnaposti compatti */
+        .post-it-compact {
+            background: white;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.4rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+            border-left: 4px solid var(--secondary-color);
+            font-size: 0.8rem;
+        }
+
+        .post-it-compact:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .post-it-compact.urgente {
+            border-left-color: var(--danger-color);
+            background: #fff5f5;
+        }
+
+        .post-it-compact.corriere {
+            border-left-color: var(--warning-color);
+            background: #fffbf0;
+        }
+
+        .post-it-compact .compact-dest {
+            font-weight: 600;
+            color: var(--gray-800);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .post-it-compact .compact-time {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+
+        .post-it-compact .compact-urgent-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.7rem;
+        }
+
+        /* Tooltip con dettagli completi */
+        .post-it-tooltip {
+            display: none;
+            position: absolute;
+            left: 105%;
+            top: 0;
+            width: 280px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            padding: 1rem;
+            z-index: 1000;
+            border: 1px solid var(--gray-200);
+        }
+
+        .post-it-compact:hover .post-it-tooltip {
+            display: block;
+        }
+
+        /* Tooltip a sinistra se colonna a destra */
+        .kanban-column:nth-child(n+5) .post-it-tooltip {
+            left: auto;
+            right: 105%;
+        }
+
+        .tooltip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .tooltip-azienda {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--gray-900);
+        }
+
+        .tooltip-badges {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .tooltip-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .tooltip-badge.urgente {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .tooltip-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .tooltip-label {
+            color: var(--gray-500);
+            min-width: 70px;
+        }
+
+        .tooltip-value {
+            color: var(--gray-800);
+            font-weight: 500;
+        }
+
+        .tooltip-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .tooltip-btn {
+            flex: 1;
+            padding: 0.4rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tooltip-btn-edit {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .tooltip-btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .tooltip-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        /* Colonne kanban più compatte */
+        .column-content {
+            min-height: 200px;
+            padding: 0.5rem;
+        }
+
+        /* Header semplificato */
+        .header-actions .home-btn {
+            background: var(--gray-200);
+            color: var(--gray-700);
+            margin-right: 0.5rem;
+        }
+
+        .header-actions .home-btn:hover {
+            background: var(--gray-300);
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -18,15 +195,12 @@
                 <h1>RBS LOGISTICA SMART</h1>
             </div>
             <div class="header-actions">
-                <div id="userInfo" class="user-info"></div>
-                <button class="btn btn-secondary" onclick="exportData()">
-                    <span class="icon">📥</span> Esporta Dati
-                </button>
-                <button class="btn btn-secondary" onclick="importData()">
-                    <span class="icon">📤</span> Importa Dati
+                <a href="welcome.html" class="btn home-btn">< Home</a>
+                <button class="btn btn-secondary" onclick="exportToGoogleMaps()">
+                    <span class="icon">Maps</span>
                 </button>
                 <button class="btn btn-primary" onclick="openPostItForm()">
-                    <span class="icon">➕</span> Nuovo Viaggio
+                    <span class="icon">+</span> Nuovo Viaggio
                 </button>
             </div>
         </div>
@@ -303,7 +477,7 @@
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
 
-    <!-- Scripts - IMPORTANTE: type="module" per supportare import ES6 -->
-    <script type="module" src="app-supabase.js"></script>
+    <!-- Scripts - Versione senza autenticazione -->
+    <script type="module" src="app-noauth.js"></script>
 </body>
 </html>
