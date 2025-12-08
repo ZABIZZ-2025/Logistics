@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Connessione Supabase</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #cce5ff; color: #004085; }
+        .warning { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        #log { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Connessione Supabase</h1>
+
+    <div class="test-section">
+        <h2>1. Configurazione</h2>
+        <div id="config-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Connessione</h2>
+        <button onclick="testConnection()">🔌 Test Connessione</button>
+        <div id="connection-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Lettura Anagrafica</h2>
+        <button onclick="testReadAnagrafica()">📖 Leggi Anagrafica</button>
+        <div id="anagrafica-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Lettura Viaggi</h2>
+        <button onclick="testReadViaggi()">📖 Leggi Viaggi</button>
+        <div id="viaggi-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Test Inserimento Viaggio</h2>
+        <button onclick="testInsertViaggio()">➕ Inserisci Viaggio Test</button>
+        <div id="insert-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Log Completo</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <script type="module">
+        // Log helper
+        const logEl = document.getElementById('log');
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent += `[${time}] ${msg}\n`;
+            console.log(msg);
+        }
+
+        function showStatus(elementId, message, type) {
+            document.getElementById(elementId).innerHTML =
+                `<div class="status ${type}">${message}</div>`;
+        }
+
+        // Configurazione diretta (senza import)
+        const SUPABASE_URL = 'https://lsknnjcgtpxykfrwlwcp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza25uamNndHB4eWtmcndsd2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MjgyNTIsImV4cCI6MjA3ODIwNDI1Mn0._BHsH-2saNGgRTcMABSiw68TOVpnEE7y43zM7jpXfls';
+
+        // Mostra configurazione
+        showStatus('config-status',
+            `<strong>URL:</strong> ${SUPABASE_URL}<br>
+             <strong>Key:</strong> ${SUPABASE_KEY.substring(0, 50)}...`,
+            'info');
+        log(`URL: ${SUPABASE_URL}`);
+        log(`Key: ${SUPABASE_KEY.substring(0, 30)}...`);
+
+        // Import Supabase
+        let supabase = null;
+
+        try {
+            log('Caricamento libreria Supabase da esm.sh...');
+            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+            log('✅ Libreria caricata');
+
+            supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+            log('✅ Client Supabase creato');
+            showStatus('config-status',
+                `<strong>URL:</strong> ${SUPABASE_URL}<br>
+                 <strong>Key:</strong> ${SUPABASE_KEY.substring(0, 50)}...<br>
+                 <strong>Client:</strong> ✅ Inizializzato`,
+                'success');
+        } catch (err) {
+            log(`❌ Errore: ${err.message}`);
+            showStatus('config-status', `❌ Errore inizializzazione: ${err.message}`, 'error');
+        }
+
+        // Test Connection
+        window.testConnection = async function() {
+            log('--- Test Connessione ---');
+            if (!supabase) {
+                showStatus('connection-status', '❌ Client non inizializzato', 'error');
+                return;
+            }
+
+            try {
+                // Test con una query semplice
+                const start = Date.now();
+                const { data, error } = await supabase.from('viaggi').select('count', { count: 'exact', head: true });
+                const elapsed = Date.now() - start;
+
+                if (error) {
+                    log(`❌ Errore: ${error.message}`);
+                    log(`Codice: ${error.code}`);
+                    log(`Dettagli: ${JSON.stringify(error)}`);
+                    showStatus('connection-status',
+                        `❌ Errore: ${error.message}<br>
+                         <strong>Codice:</strong> ${error.code}<br>
+                         <strong>Hint:</strong> ${error.hint || 'nessuno'}`,
+                        'error');
+                } else {
+                    log(`✅ Connessione OK (${elapsed}ms)`);
+                    showStatus('connection-status', `✅ Connessione riuscita in ${elapsed}ms`, 'success');
+                }
+            } catch (err) {
+                log(`❌ Eccezione: ${err.message}`);
+                showStatus('connection-status', `❌ Eccezione: ${err.message}`, 'error');
+            }
+        };
+
+        // Test Read Anagrafica
+        window.testReadAnagrafica = async function() {
+            log('--- Test Lettura Anagrafica ---');
+            if (!supabase) {
+                showStatus('anagrafica-status', '❌ Client non inizializzato', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('anagrafica')
+                    .select('*')
+                    .limit(10);
+
+                if (error) {
+                    log(`❌ Errore: ${error.message}`);
+                    showStatus('anagrafica-status',
+                        `❌ ${error.message}<br><pre>${JSON.stringify(error, null, 2)}</pre>`,
+                        'error');
+                } else {
+                    log(`✅ Letti ${data.length} record`);
+                    log(JSON.stringify(data, null, 2));
+                    showStatus('anagrafica-status',
+                        `✅ Trovati ${data.length} clienti<br>
+                         <pre>${JSON.stringify(data, null, 2)}</pre>`,
+                        'success');
+                }
+            } catch (err) {
+                log(`❌ Eccezione: ${err.message}`);
+                showStatus('anagrafica-status', `❌ ${err.message}`, 'error');
+            }
+        };
+
+        // Test Read Viaggi
+        window.testReadViaggi = async function() {
+            log('--- Test Lettura Viaggi ---');
+            if (!supabase) {
+                showStatus('viaggi-status', '❌ Client non inizializzato', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('viaggi')
+                    .select('*')
+                    .limit(10);
+
+                if (error) {
+                    log(`❌ Errore: ${error.message}`);
+                    showStatus('viaggi-status',
+                        `❌ ${error.message}<br><pre>${JSON.stringify(error, null, 2)}</pre>`,
+                        'error');
+                } else {
+                    log(`✅ Letti ${data.length} viaggi`);
+                    log(JSON.stringify(data, null, 2));
+                    showStatus('viaggi-status',
+                        `✅ Trovati ${data.length} viaggi<br>
+                         <pre>${JSON.stringify(data, null, 2)}</pre>`,
+                        'success');
+                }
+            } catch (err) {
+                log(`❌ Eccezione: ${err.message}`);
+                showStatus('viaggi-status', `❌ ${err.message}`, 'error');
+            }
+        };
+
+        // Test Insert
+        window.testInsertViaggio = async function() {
+            log('--- Test Inserimento Viaggio ---');
+            if (!supabase) {
+                showStatus('insert-status', '❌ Client non inizializzato', 'error');
+                return;
+            }
+
+            const testViaggio = {
+                urgente: false,
+                azienda: 'TEST AZIENDA',
+                luogo: 'Via Test 123, Milano',
+                data: new Date().toISOString().split('T')[0],
+                orario: '10:00',
+                circuito: 'nord-ovest',
+                merce: 'Test merce',
+                peso: 10,
+                volume: 2,
+                motivo: 'consegna',
+                note: 'Viaggio di test - può essere eliminato',
+                column: 'richieste',
+                order: Date.now(),
+                status: 'pending',
+                created_by_username: 'Test'
+            };
+
+            log('Dati da inserire:');
+            log(JSON.stringify(testViaggio, null, 2));
+
+            try {
+                const { data, error } = await supabase
+                    .from('viaggi')
+                    .insert([testViaggio])
+                    .select();
+
+                if (error) {
+                    log(`❌ Errore INSERT: ${error.message}`);
+                    log(`Codice: ${error.code}`);
+                    log(`Dettagli: ${error.details}`);
+                    showStatus('insert-status',
+                        `❌ ${error.message}<br>
+                         <strong>Codice:</strong> ${error.code}<br>
+                         <strong>Dettagli:</strong> ${error.details || 'nessuno'}<br>
+                         <pre>${JSON.stringify(error, null, 2)}</pre>`,
+                        'error');
+                } else {
+                    log(`✅ Viaggio inserito con successo!`);
+                    log(JSON.stringify(data, null, 2));
+                    showStatus('insert-status',
+                        `✅ Viaggio inserito!<br>
+                         <pre>${JSON.stringify(data, null, 2)}</pre>`,
+                        'success');
+                }
+            } catch (err) {
+                log(`❌ Eccezione: ${err.message}`);
+                showStatus('insert-status', `❌ ${err.message}`, 'error');
+            }
+        };
+
+        log('=== Pagina di test pronta ===');
+    </script>
+</body>
+</html>
