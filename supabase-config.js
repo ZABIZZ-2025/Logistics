@@ -17,8 +17,8 @@ const SUPABASE_CONFIG = {
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxza25uamNndHB4eWtmcndsd2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MjgyNTIsImV4cCI6MjA3ODIwNDI1Mn0._BHsH-2saNGgRTcMABSiw68TOVpnEE7y43zM7jpXfls'
 };
 
-// Import Supabase client library
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Import Supabase client library (esm.sh è più stabile per ESM)
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Create Supabase client
 const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
