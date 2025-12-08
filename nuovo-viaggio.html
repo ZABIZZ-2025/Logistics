@@ -329,8 +329,33 @@
         // Set today's date as default
         document.getElementById('data').valueAsDate = new Date();
 
+        // Verifica connessione Supabase
+        if (!supabase) {
+            console.error('Supabase non inizializzato');
+            showToast('Errore connessione database', 'error');
+        } else {
+            console.log('Supabase connesso');
+        }
+
         async function saveViaggio(event) {
             event.preventDefault();
+
+            // Verifica supabase
+            if (!supabase) {
+                showToast('Errore: database non connesso', 'error');
+                return;
+            }
+
+            // Verifica che motivo sia selezionato
+            const motivoEl = document.querySelector('input[name="motivo"]:checked');
+            if (!motivoEl) {
+                showToast('Seleziona il motivo del viaggio', 'error');
+                return;
+            }
+
+            const submitBtn = document.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Salvataggio...';
 
             const viaggioData = {
                 urgente: document.getElementById('urgente').checked,
@@ -342,7 +367,7 @@
                 merce: document.getElementById('merce').value.trim(),
                 peso: parseFloat(document.getElementById('peso').value) || 0,
                 volume: parseInt(document.getElementById('volume').value) || 0,
-                motivo: document.querySelector('input[name="motivo"]:checked').value,
+                motivo: motivoEl.value,
                 note: document.getElementById('note').value.trim(),
                 column: 'richieste',
                 order: Date.now(),
@@ -350,14 +375,20 @@
                 status: 'pending'
             };
 
+            console.log('Salvataggio viaggio:', viaggioData);
+
             try {
                 const { data, error } = await supabase
                     .from('viaggi')
                     .insert([viaggioData])
                     .select();
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Errore Supabase:', error);
+                    throw error;
+                }
 
+                console.log('Viaggio salvato:', data);
                 showToast('Viaggio creato con successo!', 'success');
                 document.getElementById('viaggioForm').reset();
                 document.getElementById('data').valueAsDate = new Date();
@@ -368,8 +399,10 @@
                 }, 1500);
 
             } catch (error) {
-                console.error('Errore:', error);
-                showToast('Errore nel salvataggio: ' + error.message, 'error');
+                console.error('Errore salvataggio:', error);
+                showToast('Errore: ' + (error.message || 'Impossibile salvare'), 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Invia Richiesta';
             }
         }
 
@@ -377,7 +410,7 @@
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = `toast ${type} show`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => toast.classList.remove('show'), 5000);
         }
 
         window.saveViaggio = saveViaggio;

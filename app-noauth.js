@@ -4,6 +4,18 @@
 
 import { supabase } from './supabase-config.js';
 
+// Verifica che Supabase sia inizializzato
+if (!supabase) {
+    console.error('ERRORE: Supabase client non inizializzato!');
+    document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById('toast');
+        if (toast) {
+            toast.textContent = 'Errore connessione database. Ricarica la pagina.';
+            toast.className = 'toast error show';
+        }
+    });
+}
+
 // Global State
 let viaggi = [];
 let currentFilters = {
@@ -21,13 +33,22 @@ let realtimeChannel = null;
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inizializzazione RBS Logistica Smart (No Auth)...');
 
-    await loadAllData();
-    renderKanban();
-    updateStats();
-    populateAutocomplete();
-    setupRealtimeSubscriptions();
+    if (!supabase) {
+        console.error('Supabase non disponibile');
+        return;
+    }
 
-    console.log('App inizializzata con successo');
+    try {
+        await loadAllData();
+        renderKanban();
+        updateStats();
+        populateAutocomplete();
+        setupRealtimeSubscriptions();
+        console.log('App inizializzata con successo');
+    } catch (err) {
+        console.error('Errore inizializzazione:', err);
+        showToast('Errore caricamento dati', 'error');
+    }
 });
 
 // ==========================================
