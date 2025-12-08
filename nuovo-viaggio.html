@@ -326,15 +326,78 @@
     <script type="module">
         import { supabase } from './supabase-config.js';
 
+        // Dati anagrafica
+        let anagraficaClienti = [];
+
         // Set today's date as default
         document.getElementById('data').valueAsDate = new Date();
 
-        // Verifica connessione Supabase
+        // Verifica connessione Supabase e carica anagrafica
         if (!supabase) {
             console.error('Supabase non inizializzato');
             showToast('Errore connessione database', 'error');
         } else {
             console.log('Supabase connesso');
+            loadAnagrafica();
+        }
+
+        // Carica anagrafica clienti da Supabase
+        async function loadAnagrafica() {
+            try {
+                const { data, error } = await supabase
+                    .from('anagrafica')
+                    .select('*')
+                    .order('cliente', { ascending: true });
+
+                if (error) {
+                    console.error('Errore caricamento anagrafica:', error);
+                    return;
+                }
+
+                anagraficaClienti = data || [];
+                console.log('Anagrafica caricata:', anagraficaClienti.length, 'clienti');
+                populateDatalist();
+            } catch (err) {
+                console.error('Errore:', err);
+            }
+        }
+
+        // Popola i datalist con i dati dell'anagrafica
+        function populateDatalist() {
+            const aziendaList = document.getElementById('aziendaList');
+            const luogoList = document.getElementById('luogoList');
+
+            if (aziendaList) {
+                aziendaList.innerHTML = anagraficaClienti
+                    .map(c => `<option value="${escapeHtml(c.cliente)}">`)
+                    .join('');
+            }
+
+            if (luogoList) {
+                const luoghi = [...new Set(anagraficaClienti.map(c => c.indirizzo).filter(Boolean))];
+                luogoList.innerHTML = luoghi
+                    .map(l => `<option value="${escapeHtml(l)}">`)
+                    .join('');
+            }
+        }
+
+        // Autofill luogo quando si seleziona un'azienda
+        document.getElementById('azienda').addEventListener('change', function() {
+            const azienda = this.value.trim();
+            const cliente = anagraficaClienti.find(c =>
+                c.cliente.toLowerCase() === azienda.toLowerCase()
+            );
+
+            if (cliente && cliente.indirizzo) {
+                document.getElementById('luogo').value = cliente.indirizzo;
+                showToast('Indirizzo compilato automaticamente', 'success');
+            }
+        });
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
         }
 
         async function saveViaggio(event) {
