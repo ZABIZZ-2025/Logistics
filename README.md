@@ -1,219 +1,191 @@
-# 🚚 RBS Logistica Smart - Supabase Edition
+# 🚚 RBS Logistica Smart
 
-Sistema completo di gestione viaggi e logistica per RBS 1979.
+Sistema di gestione viaggi e logistica con Kanban board interattiva e sincronizzazione real-time.
 
-## 🎯 Caratteristiche
+## ✨ Caratteristiche
 
-- ✅ **Autenticazione sicura** con Supabase Auth
-- ✅ **Database real-time** con Supabase PostgreSQL
-- ✅ **Sincronizzazione multi-utente** in tempo reale
-- ✅ **Kanban board interattivo** con drag & drop
-- ✅ **Gestione anagrafica clienti**
-- ✅ **Export Google Maps** per pianificazione percorsi
-- ✅ **Responsive design** (Desktop, Tablet, Mobile)
-- ✅ **PWA ready** (installabile come app)
+- ✅ Gestione viaggi con Kanban board drag & drop
+- ✅ Autenticazione multi-utente (Admin/User)
+- ✅ Creazione e gestione richieste viaggi
+- ✅ Anagrafica clienti con autocompletamento
+- ✅ Export percorsi Google Maps
+- ✅ Sincronizzazione real-time con Supabase
+- ✅ Interfaccia responsive e moderna
 
-## 📋 Requisiti
+## 🚀 Setup Rapido
 
-- Account Supabase (gratuito): https://supabase.com
-- Browser moderno (Chrome, Firefox, Safari, Edge)
+### 1. Crea Progetto Supabase
 
-## 🚀 Deploy su Netlify (5 minuti)
+1. Vai su [supabase.com](https://supabase.com) e crea un account
+2. Crea un nuovo progetto
+3. Vai su **SQL Editor** e esegui il contenuto di `supabase-schema.sql`
+4. Vai su **Settings → API** e copia:
+   - **Project URL**
+   - **anon public key**
 
-### 1. Configura Supabase
+### 2. Configura l'Applicazione
 
-1. Crea account su https://app.supabase.com
-2. Crea nuovo progetto "RBS Logistica"
-3. Vai su SQL Editor e esegui `supabase-schema.sql`
-4. Vai su Settings > API e copia:
-   - Project URL
-   - anon public key
-
-### 2. Configura l'App
-
-Modifica `supabase-config.js`:
+Apri `supabase-config.js` e sostituisci i valori:
 
 ```javascript
 const SUPABASE_CONFIG = {
-    url: 'IL_TUO_PROJECT_URL',
-    anonKey: 'LA_TUA_ANON_KEY'
+    url: 'https://tuo-progetto.supabase.co',  // Il tuo Project URL
+    anonKey: 'tua-anon-public-key'            // La tua anon public key
 };
 ```
 
-### 3. Crea Utente Admin
+### 3. Crea Utente Amministratore
 
-1. Vai su Authentication > Users
-2. Click "Add user" > "Create new user"
-3. Email: `admin@rbslogistica.local`
-4. Password: (scegli una password sicura)
-5. ✅ Spunta "Auto Confirm User"
-6. Copia l'UUID dell'utente creato
-7. Vai su SQL Editor ed esegui:
+1. In Supabase Dashboard vai su **Authentication → Users**
+2. Clicca **Add user** → **Create new user**
+3. Inserisci:
+   - Email: `admin@tuodominio.com`
+   - Password: (scegli una password sicura)
+   - ✅ Spunta "Auto Confirm User"
+4. Copia l'**UUID** dell'utente creato
+5. Vai su **SQL Editor** ed esegui:
 
 ```sql
 INSERT INTO user_profiles (id, user_id, username, role)
 VALUES (
-    'UUID_DELL_UTENTE',  -- Sostituisci con UUID copiato
-    'admin',
-    'Amministratore',
-    'admin'
+    'uuid-copiato-da-auth-users',  -- UUID dell'utente
+    'admin',                        -- Username
+    'Amministratore',              -- Nome visualizzato
+    'admin'                        -- Ruolo: 'admin' o 'user'
 );
 ```
 
-### 4. Deploy su Netlify
+### 4. Deploy
 
-**Opzione A: Netlify Drop (più veloce)**
-1. Vai su https://app.netlify.com/drop
+**Opzione A - Netlify (consigliato):**
+1. Vai su [netlify.com/drop](https://app.netlify.com/drop)
 2. Trascina l'intera cartella del progetto
-3. Attendi 30 secondi
-4. **FATTO!** L'app è online
+3. Fatto! L'app è online 🎉
 
-**Opzione B: Git Deploy (consigliato per produzione)**
-1. Pusha il repository su GitHub
-2. Vai su https://app.netlify.com
-3. Click "Add new site" > "Import from Git"
-4. Seleziona il repository
-5. Deploy automatico ad ogni push
+**Opzione B - Locale:**
+1. Apri `index.html` nel browser
+2. Fatto! 🎉
+
+## 🔐 Login
+
+- **Email**: quella inserita in Supabase Auth (es: admin@tuodominio.com)
+- **Password**: quella impostata in Supabase Auth
+- **IMPORTANTE**: Usa l'**EMAIL**, non un username!
+
+## 🗄️ Migrazioni Database
+
+Se il database esiste già ed è stato creato con una versione precedente, applica queste migrazioni in ordine:
+
+### 1. Aggiunta Campi Viaggi
+```bash
+supabase-migration-add-missing-fields.sql
+```
+Aggiunge i campi: `circuito`, `merce`, `peso`, `volume`, `motivo`
+
+### 2. Fix Trigger Eliminazione
+```bash
+supabase-migration-fix-delete-trigger.sql
+```
+Corregge il trigger per permettere l'eliminazione corretta dei viaggi
 
 ## 📁 Struttura File
 
 ```
-/
-├── index.html              # Pagina login (entry point)
-├── dashboard.html          # Dashboard Kanban
-├── app-supabase.js         # Logica applicazione
-├── supabase-config.js      # Configurazione Supabase
-├── supabase-schema.sql     # Schema database
-├── styles.css              # Stili CSS
-├── logo.svg                # Logo RBS
-├── manifest.json           # PWA manifest
-├── docs/                   # Documentazione completa
-└── README.md               # Questo file
+├── index.html                                  # Pagina di login
+├── dashboard.html                              # Applicazione principale
+├── app-supabase.js                            # Logica applicazione
+├── supabase-config.js                         # ⚙️ Configurazione Supabase
+├── styles.css                                 # Stili CSS
+├── logo.svg                                   # Logo
+├── manifest.json                              # PWA manifest
+├── netlify.toml                               # Configurazione Netlify
+├── _redirects                                 # Rewrite rules Netlify
+├── supabase-schema.sql                        # 🗄️ Schema database completo
+├── supabase-migration-add-missing-fields.sql  # Migrazione campi
+└── supabase-migration-fix-delete-trigger.sql  # Migrazione trigger
 ```
 
-## 🔐 Primo Accesso
-
-1. Apri l'app nel browser
-2. Email: `admin@rbslogistica.local`
-3. Password: (quella scelta in Supabase)
-4. Accedi e inizia a usare l'app!
-
-## 📱 Funzionalità Principali
+## 🎯 Funzionalità
 
 ### Per Utenti Normali
-- ✅ Creare nuove richieste di viaggio
-- ✅ Visualizzare i propri viaggi
-- ✅ Modificare richieste in stato "Richieste"
-- ✅ Visualizzare storico delle modifiche
+- Creare nuove richieste di viaggio
+- Visualizzare le proprie richieste
+- Visualizzare lo stato delle richieste
 
 ### Per Amministratori
-- ✅ Tutte le funzionalità utente +
-- ✅ Gestire TUTTI i viaggi (drag & drop tra colonne)
-- ✅ Modificare qualsiasi viaggio
-- ✅ Eliminare viaggi
-- ✅ Gestire anagrafica clienti
-- ✅ Esportare dati
-- ✅ Export Google Maps per percorsi
-
-## 🎨 Colonne Kanban
-
-1. **Richieste** - Nuove richieste da processare
-2. **Pianificato** - Viaggi pianificati
-3. **In Corso** - Viaggi in esecuzione
-4. **Preventivi** - Richieste di preventivo
-5. **Corriere Esterno** - Affidati a corrieri terzi
-6. **Completato** - Viaggi conclusi
-
-## 🔄 Sincronizzazione Real-time
-
-L'app usa Supabase Realtime per sincronizzare automaticamente:
-- Nuovi viaggi creati
-- Modifiche ai viaggi esistenti
-- Spostamenti tra colonne
-- Eliminazioni
-
-Apri l'app in 2 finestre: le modifiche si vedono ISTANTANEAMENTE!
-
-## 📊 Database
-
-### Tabelle
-- `user_profiles` - Profili utenti (ruoli e permessi)
-- `anagrafica` - Clienti/fornitori
-- `viaggi` - Viaggi/spedizioni
-- `history` - Storico modifiche
-
-### Sicurezza (RLS)
-- ✅ Row Level Security abilitato
-- ✅ Utenti vedono solo i propri dati
-- ✅ Admin ha accesso completo
-- ✅ Politiche di sicurezza automatiche
-
-## 🛠️ Sviluppo Locale
-
-```bash
-# 1. Clona il repository
-git clone <repository-url>
-cd Logistics
-
-# 2. Configura Supabase (modifica supabase-config.js)
-
-# 3. Avvia server locale
-python3 -m http.server 8000
-# oppure
-npx http-server -p 8000
-
-# 4. Apri browser
-open http://localhost:8000
-```
-
-## 📖 Documentazione Completa
-
-Tutte le guide sono nella cartella `docs/`:
-
-- `DEPLOY_RAPIDO_NETLIFY.txt` - Guida deploy dettagliata
-- `SUPABASE_SETUP_GUIDE.md` - Setup Supabase completo
-- `TROUBLESHOOTING_LOGIN.md` - Risoluzione problemi
-- E molte altre...
+- Tutte le funzionalità degli utenti +
+- Gestire TUTTI i viaggi con drag & drop
+- Modificare e eliminare qualsiasi viaggio
+- Gestire anagrafica clienti
+- Esportare percorsi su Google Maps
 
 ## 🆘 Troubleshooting
 
-### Login loop (torna sempre al login)
-- **Causa**: Profilo non inserito in `user_profiles`
-- **Soluzione**: Verifica di aver eseguito la query INSERT con l'UUID corretto
+### Login non funziona (loop infinito)
 
-### Errore "Invalid login credentials"
-- **Causa**: Email o password errate
-- **Soluzione**: Verifica credenziali in Supabase > Authentication > Users
+**Problema**: La pagina torna sempre al login dopo aver inserito le credenziali.
 
-### Errore CORS
-- **Causa**: File `supabase-config.js` non modificato
-- **Soluzione**: Inserisci URL e key reali (non `YOUR_SUPABASE_...`)
+**Soluzioni**:
+1. **Verifica che il progetto Supabase sia attivo**
+   - Vai su Supabase Dashboard
+   - Se vedi "Paused", clicca "Restore/Unpause"
+   - Aspetta 2-3 minuti
 
-### Più dettagli
-Consulta `docs/TROUBLESHOOTING_LOGIN.md` per diagnostica completa
+2. **Verifica URL e chiavi in `supabase-config.js`**
+   - Devono corrispondere a quelli in Settings → API
+
+3. **Verifica profilo utente**
+   - Esegui in SQL Editor:
+   ```sql
+   SELECT * FROM user_profiles;
+   ```
+   - Deve esistere un profilo con l'UUID dell'utente
+
+4. **Usa EMAIL per il login** (non username!)
+
+5. **Pulisci cache browser** (Ctrl+Shift+Del)
+
+### Errore "Cannot read properties of null (reading 'AuthClient')"
+
+**Problema**: Supabase client non riesce a inizializzarsi.
+
+**Soluzioni**:
+1. Verifica che il progetto Supabase sia **Active** (non Paused)
+2. Verifica che URL e anon key in `supabase-config.js` siano corretti
+3. Pulisci cache browser e ricarica (Ctrl+Shift+F5)
+
+### Errore creazione viaggi
+
+**Problema**: Errore al salvataggio del viaggio.
+
+**Soluzione**: Applica la migrazione `supabase-migration-add-missing-fields.sql`
+
+### Errore eliminazione viaggi
+
+**Problema**: Errore quando si elimina un viaggio.
+
+**Soluzione**: Applica la migrazione `supabase-migration-fix-delete-trigger.sql`
 
 ## 🔒 Sicurezza
 
-- ✅ HTTPS obbligatorio (fornito da Netlify)
-- ✅ Autenticazione JWT con Supabase
-- ✅ Row Level Security su database
-- ✅ API keys protette (anon key è pubblica per design)
-- ✅ Nessun dato sensibile in frontend
+- HTTPS obbligatorio (fornito da Netlify)
+- Autenticazione JWT con Supabase
+- Row Level Security (RLS) abilitato
+- Permessi basati su ruoli (admin/user)
 
-## 📝 Licenza
+## 📞 Supporto
 
-© 2025 RBS 1979 - Uso interno aziendale
+Per problemi:
+1. Apri la Console browser (F12) e verifica errori
+2. Verifica che Supabase sia configurato correttamente
+3. Verifica che le migrazioni siano state applicate
 
-## 🤝 Supporto
+## 📄 Licenza
 
-Per problemi o domande:
-1. Consulta la documentazione in `docs/`
-2. Verifica Console browser (F12) per errori
-3. Controlla configurazione Supabase
+© 2025 RBS 1979 - Tutti i diritti riservati
 
 ---
 
-**Versione**: 2.0.0
-**Ultimo aggiornamento**: Novembre 2025
+**Versione**: 2.0
 **Database**: Supabase PostgreSQL
 **Deploy**: Netlify
