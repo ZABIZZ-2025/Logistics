@@ -89,10 +89,10 @@ SELECT
 -- Se la diagnosi dice "user_profiles è VUOTA", esegui questa query
 -- per ogni utente (sostituisci i valori tra apici):
 
-/*
+
 INSERT INTO user_profiles (id, user_id, username, role)
 VALUES (
-    'COPIA-UUID-DA-TABELLA-SOPRA',  -- UUID dell'utente da auth.users
+    '062d3406-7c7f-4b95-9b89-513a8550614f',  -- UUID dell'utente da auth.users
     'admin',                         -- Username per il login (es: admin, mario.rossi)
     'Amministratore',               -- Nome completo da visualizzare
     'admin'                         -- Ruolo: 'admin' o 'user'
@@ -101,12 +101,12 @@ VALUES (
 -- Esempio per secondo utente:
 INSERT INTO user_profiles (id, user_id, username, role)
 VALUES (
-    'ALTRO-UUID-DA-TABELLA-SOPRA',
-    'mario.rossi',
-    'Mario Rossi',
+    'ab67df2e-5610-4ad4-8a55-3bc7b684b412',
+    'user',
+    'utente',
     'user'
 );
-*/
+
 
 -- ============================================
 -- Dopo aver inserito i profili, riprova il login!
