@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anagrafica Clienti - RBS Logistica Smart</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            color: var(--gray-700);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-400);
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #e85a2a;
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        /* Form styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .btn-save {
+            padding: 0.75rem 1.5rem;
+            background: var(--success-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--gray-100);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-300);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-edit:hover, .btn-delete:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+            font-style: italic;
+        }
+
+        .search-box {
+            margin-bottom: 1rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .count-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--success-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Anagrafica Clienti</h1>
+            <div class="header-actions">
+                <a href="welcome.html" class="back-btn">< Home</a>
+                <a href="dashboard.html" class="back-btn">Kanban</a>
+            </div>
+        </div>
+
+        <!-- Form nuovo cliente -->
+        <div class="card">
+            <h2 class="card-title">+ Aggiungi Nuovo Cliente</h2>
+            <form id="clienteForm" onsubmit="saveCliente(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cliente">Nome Cliente *</label>
+                        <input type="text" id="cliente" required placeholder="es. AZIENDA SRL">
+                    </div>
+                    <div class="form-group">
+                        <label for="indirizzo">Indirizzo Completo *</label>
+                        <input type="text" id="indirizzo" required placeholder="es. Via Roma 123, 20100 Milano MI">
+                    </div>
+                    <button type="submit" class="btn-save">Salva</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista clienti -->
+        <div class="card">
+            <h2 class="card-title">
+                Lista Clienti
+                <span class="count-badge" id="countBadge">0</span>
+            </h2>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cerca cliente o indirizzo..." oninput="filterTable()">
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Indirizzo</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientiTableBody">
+                        <tr>
+                            <td colspan="3" class="empty-message">Caricamento...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        import { initSupabase } from './supabase-config.js';
+
+        let supabase = null;
+        let clienti = [];
+        let editingId = null;
+
+        async function init() {
+            console.log('Inizializzazione anagrafica...');
+
+            supabase = await initSupabase();
+
+            if (!supabase) {
+                showToast('Errore connessione database', 'error');
+                return;
+            }
+
+            await loadClienti();
+        }
+
+        async function loadClienti() {
+            try {
+                const { data, error } = await supabase
+                    .from('anagrafica')
+                    .select('*')
+                    .order('cliente', { ascending: true });
+
+                if (error) throw error;
+
+                clienti = data || [];
+                renderTable();
+                document.getElementById('countBadge').textContent = clienti.length;
+                console.log('Caricati', clienti.length, 'clienti');
+            } catch (err) {
+                console.error('Errore caricamento:', err);
+                showToast('Errore caricamento dati', 'error');
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('clientiTableBody');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = clienti.filter(c =>
+                (c.cliente && c.cliente.toLowerCase().includes(searchTerm)) ||
+                (c.indirizzo && c.indirizzo.toLowerCase().includes(searchTerm))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="empty-message">Nessun cliente trovato</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(c => `
+                <tr>
+                    <td><strong>${escapeHtml(c.cliente)}</strong></td>
+                    <td>${escapeHtml(c.indirizzo || '-')}</td>
+                    <td class="action-btns">
+                        <button class="btn-edit" onclick="editCliente('${c.id}')">Modifica</button>
+                        <button class="btn-delete" onclick="deleteCliente('${c.id}')">Elimina</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            renderTable();
+        }
+
+        async function saveCliente(event) {
+            event.preventDefault();
+
+            const clienteInput = document.getElementById('cliente');
+            const indirizzoInput = document.getElementById('indirizzo');
+
+            const data = {
+                cliente: clienteInput.value.trim().toUpperCase(),
+                indirizzo: indirizzoInput.value.trim()
+            };
+
+            try {
+                if (editingId) {
+                    // Update
+                    const { error } = await supabase
+                        .from('anagrafica')
+                        .update(data)
+                        .eq('id', editingId);
+
+                    if (error) throw error;
+                    showToast('Cliente aggiornato!', 'success');
+                    editingId = null;
+                    document.querySelector('.btn-save').textContent = 'Salva';
+                } else {
+                    // Insert
+                    const { error } = await supabase
+                        .from('anagrafica')
+                        .insert([data]);
+
+                    if (error) throw error;
+                    showToast('Cliente aggiunto!', 'success');
+                }
+
+                clienteInput.value = '';
+                indirizzoInput.value = '';
+                await loadClienti();
+            } catch (err) {
+                console.error('Errore salvataggio:', err);
+                showToast('Errore: ' + err.message, 'error');
+            }
+        }
+
+        function editCliente(id) {
+            const cliente = clienti.find(c => c.id === id);
+            if (!cliente) return;
+
+            document.getElementById('cliente').value = cliente.cliente || '';
+            document.getElementById('indirizzo').value = cliente.indirizzo || '';
+            editingId = id;
+            document.querySelector('.btn-save').textContent = 'Aggiorna';
+            document.getElementById('cliente').focus();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteCliente(id) {
+            if (!confirm('Eliminare questo cliente?')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('anagrafica')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                showToast('Cliente eliminato', 'success');
+                await loadClienti();
+            } catch (err) {
+                console.error('Errore eliminazione:', err);
+                showToast('Errore: ' + err.message, 'error');
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Export to window
+        window.saveCliente = saveCliente;
+        window.editCliente = editCliente;
+        window.deleteCliente = deleteCliente;
+        window.filterTable = filterTable;
+
+        // Init
+        init();
+    </script>
+</body>
+</html>
