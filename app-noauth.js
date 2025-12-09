@@ -133,9 +133,10 @@ function createCompactPostIt(viaggio) {
     div.addEventListener('dragstart', dragStart);
     div.addEventListener('dragend', dragEnd);
 
-    // Eventi hover per tooltip
-    div.addEventListener('mouseenter', showTooltipHandler);
-    div.addEventListener('mouseleave', hideTooltipHandler);
+    // Eventi per mostrare tooltip
+    div.addEventListener('mouseenter', (e) => showGlobalTooltip(viaggio, e));
+    div.addEventListener('mouseleave', hideGlobalTooltipDelayed);
+    div.addEventListener('dblclick', (e) => showGlobalTooltip(viaggio, e, true));
 
     // Formatta luogo abbreviato
     const luogoShort = viaggio.luogo && viaggio.luogo.length > 25
@@ -151,60 +152,10 @@ function createCompactPostIt(viaggio) {
         }
     }
 
-    const motivoLabel = {
-        'ritiro': 'Ritiro',
-        'consegna': 'Consegna',
-        'entrambi': 'Rit+Cons'
-    };
-
-    const circuitoLabel = {
-        'nord-est': 'NE',
-        'nord-ovest': 'NO',
-        'sud': 'Sud',
-        'corriere': 'Corr'
-    };
-
     div.innerHTML = `
         ${viaggio.urgente ? '<span class="compact-urgent-badge">!</span>' : ''}
         <div class="compact-dest">${escapeHtml(luogoShort)}</div>
         <div class="compact-time">${viaggio.orario || ''} - ${dataFormatted}</div>
-
-        <div class="post-it-tooltip">
-            <div class="tooltip-header">
-                <span class="tooltip-azienda">${escapeHtml(viaggio.azienda || '')}</span>
-                ${viaggio.urgente ? '<span class="tooltip-badge urgente">URGENTE</span>' : ''}
-            </div>
-            <div class="tooltip-row">
-                <span class="tooltip-label">Luogo:</span>
-                <span class="tooltip-value">${escapeHtml(viaggio.luogo || '')}</span>
-            </div>
-            <div class="tooltip-row">
-                <span class="tooltip-label">Data:</span>
-                <span class="tooltip-value">${dataFormatted} ${viaggio.orario || ''}</span>
-            </div>
-            <div class="tooltip-row">
-                <span class="tooltip-label">Circuito:</span>
-                <span class="tooltip-value">${circuitoLabel[viaggio.circuito] || viaggio.circuito || ''}</span>
-            </div>
-            <div class="tooltip-row">
-                <span class="tooltip-label">Merce:</span>
-                <span class="tooltip-value">${escapeHtml(viaggio.merce || '-')}</span>
-            </div>
-            <div class="tooltip-row">
-                <span class="tooltip-label">Tipo:</span>
-                <span class="tooltip-value">${motivoLabel[viaggio.motivo] || viaggio.motivo || ''}</span>
-            </div>
-            ${viaggio.note ? `
-            <div class="tooltip-row">
-                <span class="tooltip-label">Note:</span>
-                <span class="tooltip-value">${escapeHtml(viaggio.note)}</span>
-            </div>
-            ` : ''}
-            <div class="tooltip-actions">
-                <button class="tooltip-btn tooltip-btn-edit" onclick="editViaggio('${viaggio.id}')">Modifica</button>
-                <button class="tooltip-btn tooltip-btn-delete" onclick="deleteViaggio('${viaggio.id}')">Elimina</button>
-            </div>
-        </div>
     `;
 
     return div;
@@ -422,35 +373,124 @@ function escapeHtml(text) {
 }
 
 // ==========================================
-// TOOLTIP HANDLERS
+// GLOBAL TOOLTIP
 // ==========================================
 
-function showTooltipHandler(ev) {
-    const postIt = ev.currentTarget;
-    const tooltip = postIt.querySelector('.post-it-tooltip');
+let tooltipTimeout = null;
+let tooltipLocked = false;
+
+function showGlobalTooltip(viaggio, event, lock = false) {
+    const tooltip = document.getElementById('globalTooltip');
     if (!tooltip) return;
 
-    // Mostra il tooltip
-    tooltip.style.display = 'block';
-    tooltip.style.position = 'fixed';
-    tooltip.style.zIndex = '9999';
+    // Se locked e non è un doppio click, non mostrare
+    if (tooltipLocked && !lock) return;
 
-    // Calcola la posizione
-    const rect = postIt.getBoundingClientRect();
-    const tooltipWidth = 280;
-    const tooltipHeight = tooltip.offsetHeight || 200;
-
-    // Controlla se c'è spazio a destra
-    let left = rect.right + 10;
-    if (left + tooltipWidth > window.innerWidth) {
-        // Posiziona a sinistra del post-it
-        left = rect.left - tooltipWidth - 10;
+    // Cancella timeout di chiusura
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
     }
 
-    // Controlla posizione verticale
+    // Lock se doppio click
+    if (lock) {
+        tooltipLocked = true;
+    }
+
+    // Labels
+    const motivoLabel = {
+        'ritiro': '📥 Ritiro',
+        'consegna': '📤 Consegna',
+        'entrambi': '🔄 Ritiro + Consegna'
+    };
+    const circuitoLabel = {
+        'nord-est': '🗺️ Nord-Est',
+        'nord-ovest': '🗺️ Nord-Ovest',
+        'sud': '🗺️ Sud',
+        'corriere': '📦 Corriere'
+    };
+
+    // Formatta data
+    let dataFormatted = viaggio.data || '';
+    if (viaggio.data) {
+        const parts = viaggio.data.split('-');
+        if (parts.length === 3) {
+            dataFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
+
+    // Contenuto tooltip
+    const content = tooltip.querySelector('.tooltip-content');
+    content.innerHTML = `
+        <div class="tooltip-header">
+            <span class="tooltip-azienda">${escapeHtml(viaggio.azienda || 'N/D')}</span>
+            <div class="tooltip-badges">
+                ${viaggio.urgente ? '<span class="tooltip-badge urgente">⚠️ URGENTE</span>' : ''}
+            </div>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">📍 Luogo:</span>
+            <span class="tooltip-value">${escapeHtml(viaggio.luogo || 'N/D')}</span>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">📅 Data:</span>
+            <span class="tooltip-value">${dataFormatted}</span>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">🕐 Orario:</span>
+            <span class="tooltip-value">${viaggio.orario || 'N/D'}</span>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">🗺️ Circuito:</span>
+            <span class="tooltip-value">${circuitoLabel[viaggio.circuito] || viaggio.circuito || 'N/D'}</span>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">📦 Merce:</span>
+            <span class="tooltip-value">${escapeHtml(viaggio.merce || 'N/D')}</span>
+        </div>
+        <div class="tooltip-row">
+            <span class="tooltip-label">🚚 Tipo:</span>
+            <span class="tooltip-value">${motivoLabel[viaggio.motivo] || viaggio.motivo || 'N/D'}</span>
+        </div>
+        ${viaggio.peso ? `
+        <div class="tooltip-row">
+            <span class="tooltip-label">⚖️ Peso:</span>
+            <span class="tooltip-value">${viaggio.peso} kg</span>
+        </div>
+        ` : ''}
+        ${viaggio.volume ? `
+        <div class="tooltip-row">
+            <span class="tooltip-label">📦 Pacchi:</span>
+            <span class="tooltip-value">${viaggio.volume}</span>
+        </div>
+        ` : ''}
+        ${viaggio.note ? `
+        <div class="tooltip-row">
+            <span class="tooltip-label">📝 Note:</span>
+            <span class="tooltip-value">${escapeHtml(viaggio.note)}</span>
+        </div>
+        ` : ''}
+        <div class="tooltip-actions">
+            <button class="tooltip-btn tooltip-btn-edit" onclick="editViaggio('${viaggio.id}')">✏️ Modifica</button>
+            <button class="tooltip-btn tooltip-btn-delete" onclick="deleteViaggio('${viaggio.id}')">🗑️ Elimina</button>
+        </div>
+    `;
+
+    // Posiziona tooltip
+    tooltip.style.display = 'block';
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    let left = rect.right + 15;
+    if (left + tooltipRect.width > window.innerWidth) {
+        left = rect.left - tooltipRect.width - 15;
+    }
+    if (left < 10) left = 10;
+
     let top = rect.top;
-    if (top + tooltipHeight > window.innerHeight) {
-        top = window.innerHeight - tooltipHeight - 10;
+    if (top + tooltipRect.height > window.innerHeight) {
+        top = window.innerHeight - tooltipRect.height - 10;
     }
     if (top < 10) top = 10;
 
@@ -458,11 +498,23 @@ function showTooltipHandler(ev) {
     tooltip.style.top = top + 'px';
 }
 
-function hideTooltipHandler(ev) {
-    const postIt = ev.currentTarget;
-    const tooltip = postIt.querySelector('.post-it-tooltip');
+function hideGlobalTooltipDelayed() {
+    if (tooltipLocked) return;
+
+    tooltipTimeout = setTimeout(() => {
+        hideGlobalTooltip();
+    }, 300);
+}
+
+function hideGlobalTooltip() {
+    const tooltip = document.getElementById('globalTooltip');
     if (tooltip) {
         tooltip.style.display = 'none';
+    }
+    tooltipLocked = false;
+    if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
     }
 }
 
@@ -477,5 +529,6 @@ window.clearFilters = clearFilters;
 window.editViaggio = editViaggio;
 window.deleteViaggio = deleteViaggio;
 window.exportToGoogleMaps = exportToGoogleMaps;
+window.hideGlobalTooltip = hideGlobalTooltip;
 
 console.log('📦 app-noauth.js caricato');

@@ -61,27 +61,36 @@
             font-size: 0.7rem;
         }
 
-        /* Tooltip con dettagli completi */
-        .post-it-tooltip {
-            display: none;
-            position: absolute;
-            left: 105%;
-            top: 0;
-            width: 280px;
+        /* Tooltip globale per dettagli viaggio */
+        .global-tooltip {
+            position: fixed;
+            width: 320px;
+            max-width: 90vw;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-            padding: 1rem;
-            z-index: 1000;
-            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            padding: 1.25rem;
+            z-index: 10000;
+            border: 2px solid var(--primary-color);
         }
 
-        /* Tooltip mostrato via JavaScript per evitare problemi con overflow */
+        .tooltip-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+            line-height: 1;
+        }
 
-        /* Tooltip a sinistra se colonna a destra */
-        .kanban-column:nth-child(n+5) .post-it-tooltip {
-            left: auto;
-            right: 105%;
+        .tooltip-close:hover {
+            color: var(--danger-color);
+        }
+
+        /* Nasconde il tooltip interno (non più usato) */
+        .post-it-tooltip {
+            display: none !important;
         }
 
         .tooltip-header {
@@ -469,6 +478,12 @@
 
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
+
+    <!-- Global Tooltip per dettagli viaggio -->
+    <div id="globalTooltip" class="global-tooltip" style="display: none;">
+        <div class="tooltip-close" onclick="hideGlobalTooltip()">&times;</div>
+        <div class="tooltip-content"></div>
+    </div>
 
     <!-- Scripts - Versione senza autenticazione -->
     <script type="module" src="app-noauth.js"></script>
