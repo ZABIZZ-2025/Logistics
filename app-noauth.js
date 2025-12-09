@@ -133,6 +133,10 @@ function createCompactPostIt(viaggio) {
     div.addEventListener('dragstart', dragStart);
     div.addEventListener('dragend', dragEnd);
 
+    // Eventi hover per tooltip
+    div.addEventListener('mouseenter', showTooltipHandler);
+    div.addEventListener('mouseleave', hideTooltipHandler);
+
     // Formatta luogo abbreviato
     const luogoShort = viaggio.luogo && viaggio.luogo.length > 25
         ? viaggio.luogo.substring(0, 25) + '...'
@@ -415,6 +419,51 @@ function escapeHtml(text) {
     if (!text) return '';
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// ==========================================
+// TOOLTIP HANDLERS
+// ==========================================
+
+function showTooltipHandler(ev) {
+    const postIt = ev.currentTarget;
+    const tooltip = postIt.querySelector('.post-it-tooltip');
+    if (!tooltip) return;
+
+    // Mostra il tooltip
+    tooltip.style.display = 'block';
+    tooltip.style.position = 'fixed';
+    tooltip.style.zIndex = '9999';
+
+    // Calcola la posizione
+    const rect = postIt.getBoundingClientRect();
+    const tooltipWidth = 280;
+    const tooltipHeight = tooltip.offsetHeight || 200;
+
+    // Controlla se c'è spazio a destra
+    let left = rect.right + 10;
+    if (left + tooltipWidth > window.innerWidth) {
+        // Posiziona a sinistra del post-it
+        left = rect.left - tooltipWidth - 10;
+    }
+
+    // Controlla posizione verticale
+    let top = rect.top;
+    if (top + tooltipHeight > window.innerHeight) {
+        top = window.innerHeight - tooltipHeight - 10;
+    }
+    if (top < 10) top = 10;
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+}
+
+function hideTooltipHandler(ev) {
+    const postIt = ev.currentTarget;
+    const tooltip = postIt.querySelector('.post-it-tooltip');
+    if (tooltip) {
+        tooltip.style.display = 'none';
+    }
 }
 
 // ==========================================
