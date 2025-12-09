@@ -324,21 +324,30 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
-        import { supabase } from './supabase-config.js';
+        import { initSupabase } from './supabase-config.js';
 
-        // Dati anagrafica
+        // Variabili globali
+        let supabase = null;
         let anagraficaClienti = [];
 
-        // Set today's date as default
-        document.getElementById('data').valueAsDate = new Date();
+        // Inizializzazione
+        async function init() {
+            console.log('🚀 Inizializzazione pagina nuovo viaggio...');
 
-        // Verifica connessione Supabase e carica anagrafica
-        if (!supabase) {
-            console.error('Supabase non inizializzato');
-            showToast('Errore connessione database', 'error');
-        } else {
-            console.log('Supabase connesso');
-            loadAnagrafica();
+            // Set today's date as default
+            document.getElementById('data').valueAsDate = new Date();
+
+            // Inizializza Supabase
+            supabase = await initSupabase();
+
+            if (!supabase) {
+                console.error('❌ Supabase non inizializzato');
+                showToast('Errore connessione database', 'error');
+                return;
+            }
+
+            console.log('✅ Supabase connesso');
+            await loadAnagrafica();
         }
 
         // Carica anagrafica clienti da Supabase
@@ -350,15 +359,15 @@
                     .order('cliente', { ascending: true });
 
                 if (error) {
-                    console.error('Errore caricamento anagrafica:', error);
+                    console.error('❌ Errore caricamento anagrafica:', error);
                     return;
                 }
 
                 anagraficaClienti = data || [];
-                console.log('Anagrafica caricata:', anagraficaClienti.length, 'clienti');
+                console.log('✅ Anagrafica caricata:', anagraficaClienti.length, 'clienti');
                 populateDatalist();
             } catch (err) {
-                console.error('Errore:', err);
+                console.error('❌ Errore:', err);
             }
         }
 
@@ -385,7 +394,7 @@
         document.getElementById('azienda').addEventListener('change', function() {
             const azienda = this.value.trim();
             const cliente = anagraficaClienti.find(c =>
-                c.cliente.toLowerCase() === azienda.toLowerCase()
+                c.cliente && c.cliente.toLowerCase() === azienda.toLowerCase()
             );
 
             if (cliente && cliente.indirizzo) {
@@ -438,7 +447,7 @@
                 status: 'pending'
             };
 
-            console.log('Salvataggio viaggio:', viaggioData);
+            console.log('💾 Salvataggio viaggio:', viaggioData);
 
             try {
                 const { data, error } = await supabase
@@ -447,11 +456,11 @@
                     .select();
 
                 if (error) {
-                    console.error('Errore Supabase:', error);
+                    console.error('❌ Errore Supabase:', error);
                     throw error;
                 }
 
-                console.log('Viaggio salvato:', data);
+                console.log('✅ Viaggio salvato:', data);
                 showToast('Viaggio creato con successo!', 'success');
                 document.getElementById('viaggioForm').reset();
                 document.getElementById('data').valueAsDate = new Date();
@@ -462,7 +471,7 @@
                 }, 1500);
 
             } catch (error) {
-                console.error('Errore salvataggio:', error);
+                console.error('❌ Errore salvataggio:', error);
                 showToast('Errore: ' + (error.message || 'Impossibile salvare'), 'error');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Invia Richiesta';
@@ -477,6 +486,9 @@
         }
 
         window.saveViaggio = saveViaggio;
+
+        // Avvia inizializzazione
+        init();
     </script>
 </body>
 </html>
