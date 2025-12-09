@@ -281,9 +281,111 @@ function clearFilters() {
 // EDIT / DELETE
 // ==========================================
 
+let editingViaggioId = null;
+
 async function editViaggio(id) {
-    // Redirect a pagina modifica (da implementare) o alert
-    alert('Funzione modifica in sviluppo. ID: ' + id);
+    // Trova il viaggio
+    const viaggio = viaggi.find(v => v.id === id);
+    if (!viaggio) {
+        showToast('Viaggio non trovato', 'error');
+        return;
+    }
+
+    // Chiudi il tooltip
+    hideGlobalTooltip();
+
+    // Popola il form
+    editingViaggioId = id;
+    document.getElementById('postItId').value = id;
+    document.getElementById('urgente').checked = viaggio.urgente || false;
+    document.getElementById('azienda').value = viaggio.azienda || '';
+    document.getElementById('luogo').value = viaggio.luogo || '';
+    document.getElementById('data').value = viaggio.data || '';
+    document.getElementById('orario').value = viaggio.orario || '';
+    document.getElementById('circuito').value = viaggio.circuito || '';
+    document.getElementById('merce').value = viaggio.merce || '';
+    document.getElementById('peso').value = viaggio.peso || '';
+    document.getElementById('volume').value = viaggio.volume || '';
+    document.getElementById('note').value = viaggio.note || '';
+
+    // Seleziona il motivo
+    const motivoRadio = document.querySelector(`input[name="motivo"][value="${viaggio.motivo}"]`);
+    if (motivoRadio) motivoRadio.checked = true;
+
+    // Aggiorna titolo modal
+    document.getElementById('modalTitle').textContent = '✏️ Modifica Viaggio';
+
+    // Apri modal
+    document.getElementById('postItModal').classList.add('show');
+}
+
+function openPostItForm() {
+    editingViaggioId = null;
+    document.getElementById('postItForm').reset();
+    document.getElementById('modalTitle').textContent = '📝 Nuovo Viaggio';
+    document.getElementById('postItModal').classList.add('show');
+}
+
+function closePostItForm() {
+    document.getElementById('postItModal').classList.remove('show');
+    editingViaggioId = null;
+}
+
+async function savePostIt(event) {
+    event.preventDefault();
+
+    const motivoEl = document.querySelector('input[name="motivo"]:checked');
+    if (!motivoEl) {
+        showToast('Seleziona il motivo del viaggio', 'error');
+        return;
+    }
+
+    const viaggioData = {
+        urgente: document.getElementById('urgente').checked,
+        azienda: document.getElementById('azienda').value.trim(),
+        luogo: document.getElementById('luogo').value.trim(),
+        data: document.getElementById('data').value,
+        orario: document.getElementById('orario').value,
+        circuito: document.getElementById('circuito').value,
+        merce: document.getElementById('merce').value.trim(),
+        peso: parseFloat(document.getElementById('peso').value) || 0,
+        volume: parseInt(document.getElementById('volume').value) || 0,
+        motivo: motivoEl.value,
+        note: document.getElementById('note').value.trim()
+    };
+
+    try {
+        if (editingViaggioId) {
+            // Update esistente
+            const { error } = await supabase
+                .from('viaggi')
+                .update(viaggioData)
+                .eq('id', editingViaggioId);
+
+            if (error) throw error;
+            showToast('Viaggio aggiornato!', 'success');
+        } else {
+            // Nuovo viaggio
+            viaggioData.column = 'richieste';
+            viaggioData.order = Date.now();
+            viaggioData.status = 'pending';
+
+            const { error } = await supabase
+                .from('viaggi')
+                .insert([viaggioData]);
+
+            if (error) throw error;
+            showToast('Viaggio creato!', 'success');
+        }
+
+        closePostItForm();
+        await loadViaggi();
+        renderKanban();
+        updateStats();
+    } catch (err) {
+        console.error('Errore salvataggio:', err);
+        showToast('Errore: ' + err.message, 'error');
+    }
 }
 
 async function deleteViaggio(id) {
@@ -550,5 +652,8 @@ window.editViaggio = editViaggio;
 window.deleteViaggio = deleteViaggio;
 window.exportToGoogleMaps = exportToGoogleMaps;
 window.hideGlobalTooltip = hideGlobalTooltip;
+window.openPostItForm = openPostItForm;
+window.closePostItForm = closePostItForm;
+window.savePostIt = savePostIt;
 
 console.log('📦 app-noauth.js caricato');
