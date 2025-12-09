@@ -379,6 +379,26 @@ function escapeHtml(text) {
 let tooltipTimeout = null;
 let tooltipLocked = false;
 
+// Aggiungi eventi al tooltip per mantenerlo aperto quando ci passi sopra
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltip = document.getElementById('globalTooltip');
+    if (tooltip) {
+        tooltip.addEventListener('mouseenter', () => {
+            // Cancella il timeout di chiusura quando entri nel tooltip
+            if (tooltipTimeout) {
+                clearTimeout(tooltipTimeout);
+                tooltipTimeout = null;
+            }
+        });
+        tooltip.addEventListener('mouseleave', () => {
+            // Chiudi quando esci dal tooltip (se non è locked)
+            if (!tooltipLocked) {
+                hideGlobalTooltip();
+            }
+        });
+    }
+});
+
 function showGlobalTooltip(viaggio, event, lock = false) {
     const tooltip = document.getElementById('globalTooltip');
     if (!tooltip) return;
