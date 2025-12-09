@@ -1321,10 +1321,7 @@ body {
     margin-top: 0.2rem;
 }
 
-/* Remove old compact and note styles */
-.post-it-compact {
-    display: none;
-}
+/* Compact post-it styles - display is controlled by dashboard.html inline styles */
 
 .post-it-note {
     font-size: 0.6rem;
